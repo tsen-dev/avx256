@@ -6,13 +6,19 @@
 
 #ifdef TEST
 
+void testHasCPUIDSupport()
+{
+	assert(AVX256Utils::HasCPUIDSupport() == true);
+}
+
 void testHasAVXSupport()
 {
-	assert(AVX256::HasAVXSupport() == true);
+	assert(AVX256Utils::HasAVXSupport() == true);
 }
 
 void runTests()
 {
+	testHasCPUIDSupport();
 	testHasAVXSupport();
 }
 
