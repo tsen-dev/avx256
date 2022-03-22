@@ -1,8 +1,6 @@
 #ifndef AVX256_H
 #define AVX256_H
 
-#include <array>
-
 class AVX256Utils
 {
 public:
@@ -16,6 +14,11 @@ private:
 template <typename T>
 class AVX256
 {
+public:
+	AVX256(T* data) : Data{ data } {}
+	T* Data;
+
+private:
 };
 
 #endif
