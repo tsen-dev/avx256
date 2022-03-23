@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <cstdint>
+#include <sstream>
 
 #include "test.h"
 #include "avx256.h"
@@ -17,10 +18,8 @@ void testHasAVXSupport()
 	assert(AVX256Utils::HasAVXSupport() == true);
 }
 
-void testAVX256ConstructorWithPointer()
+void testAVX256Constructor()
 {
-	// Constructing using a data pointer
-
 	float floats[] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
 	double doubles[] = { 1.0, 2.0, 3.0, 4.0 };
 	uint32_t ints[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
@@ -44,11 +43,23 @@ void testAVX256ConstructorWithPointer()
 	assert(std::equal(std::begin(chars), std::end(chars), avxChars.Data) == true);
 }
 
+void testAVX256Print()
+{
+	float floats[] = { 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5 };
+	AVX256<float> myFloats{ floats };
+
+	std::stringstream printStream;
+	printStream << myFloats;
+
+	assert(printStream.str() == "|1.5|2.5|3.5|4.5|5.5|6.5|7.5|8.5|");	
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
 	testHasAVXSupport();
-	testAVX256ConstructorWithPointer();
+	testAVX256Constructor();
+	testAVX256Print();
 }
 
 int main()

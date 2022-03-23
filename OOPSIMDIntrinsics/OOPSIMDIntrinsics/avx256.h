@@ -8,7 +8,7 @@ public:
 	friend void testHasCPUIDSupport(void);
 
 private:
-	static bool HasCPUIDSupport(void);
+	static bool HasCPUIDSupport(void);	
 };
 
 template <typename T>
@@ -20,5 +20,17 @@ public:
 
 private:
 };
+
+template<typename T>
+std::ostream& operator<< (std::ostream& out, const AVX256<T>& myAvx)
+{
+	for (int i = 0; i < (256 / 8) / sizeof(T); ++i)
+		out << "|" << myAvx.Data[i];
+
+	out << '|';
+
+	return out;
+}
+
 
 #endif
