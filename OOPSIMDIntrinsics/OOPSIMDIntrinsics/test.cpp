@@ -22,9 +22,9 @@ void testAVX256Constructor()
 {
 	float floats[] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
 	double doubles[] = { 1.0, 2.0, 3.0, 4.0 };
-	uint32_t ints[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-	uint16_t shorts[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-	uint8_t chars[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
+	uint32_t uInts[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+	uint16_t uShorts[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+	uint8_t uChars[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
 		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };	
 
 	AVX256<float> avxFloats{ floats };
@@ -33,25 +33,58 @@ void testAVX256Constructor()
 	AVX256<double> avxDoubles{ doubles };
 	assert(std::equal(std::begin(doubles), std::end(doubles), avxDoubles.Data) == true);
 
-	AVX256<uint32_t> avxInts{ ints };
-	assert(std::equal(std::begin(ints), std::end(ints), avxInts.Data) == true);
+	AVX256<uint32_t> avxUInts{ uInts };
+	assert(std::equal(std::begin(uInts), std::end(uInts), avxUInts.Data) == true);
 
-	AVX256<uint16_t> avxShorts{ shorts };
-	assert(std::equal(std::begin(shorts), std::end(shorts), avxShorts.Data) == true);
+	AVX256<uint16_t> avxUShorts{ uShorts };
+	assert(std::equal(std::begin(uShorts), std::end(uShorts), avxUShorts.Data) == true);
 
-	AVX256<uint8_t> avxChars{ chars };
-	assert(std::equal(std::begin(chars), std::end(chars), avxChars.Data) == true);
+	AVX256<uint8_t> avxUChars{ uChars };
+	assert(std::equal(std::begin(uChars), std::end(uChars), avxUChars.Data) == true);
 }
 
-void testAVX256Print()
+void testAVX256SubscriptOperator()
 {
-	float floats[] = { 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5 };
-	AVX256<float> myFloats{ floats };
+	double doubles[] = { 1.5, 2.5, 3.5, 4.5 };
+	uint64_t uLongs[] = { 1, 2, 3, 4 };
+	int64_t longs[] = { -1, 2, -3, 4 };	
+
+	AVX256<double> avxDoubles{ doubles };
+	AVX256<uint64_t> avxULongs{ uLongs };
+	AVX256<int64_t> avxLongs{ longs };
+
+	for (int i = 0; i < 4; ++i)
+	{
+		assert(
+			avxDoubles[i] == doubles[i] &&
+			avxULongs[i] == uLongs[i] &&
+			avxLongs[i] == longs[i]
+		);
+	}
+}
+
+void testAVX256PrintOperator()
+{
+	double doubles[] = { 1.5, 2.5, 3.5, 4.5 };
+	uint64_t uLongs[] = { 1, 2, 3, 4 };
+	int64_t longs[] = { -1, 2, -3, 4 };
+
+	AVX256<double> avxDoubles{ doubles };
+	AVX256<uint64_t> avxULongs{ uLongs };
+	AVX256<int64_t> avxLongs{ longs };
 
 	std::stringstream printStream;
-	printStream << myFloats;
 
-	assert(printStream.str() == "|1.5|2.5|3.5|4.5|5.5|6.5|7.5|8.5|");	
+	printStream << avxDoubles;
+	assert(printStream.str() == "|1.5|2.5|3.5|4.5|");
+	printStream.str("");
+
+	printStream << avxULongs;
+	assert(printStream.str() == "|1|2|3|4|");
+	printStream.str("");
+
+	printStream << avxLongs;
+	assert(printStream.str() == "|-1|2|-3|4|");
 }
 
 void runTests()
@@ -59,7 +92,9 @@ void runTests()
 	testHasCPUIDSupport();
 	testHasAVXSupport();
 	testAVX256Constructor();
-	testAVX256Print();
+	testAVX256SubscriptOperator();
+	testAVX256PrintOperator();
+	
 }
 
 int main()
