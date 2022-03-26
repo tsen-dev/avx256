@@ -41,6 +41,19 @@ void testAVX256Constructor()
 
 	AVX256<uint8_t> avxUChars{ uChars };
 	assert(std::equal(std::begin(uChars), std::end(uChars), avxUChars.Data) == true);
+
+	/* Testing invalid constructions that should not compile:
+
+	void* voids;
+	AVX256<void> avxVoid{ voids }; // 'AVX256': class template cannot be constructed
+
+
+	class X {};
+	X* xs;
+	AVX256<X> avxX{ xs }; // 'AVX256': class template cannot be constructed
+
+	uint8_t* uCharPtrs[] = { &uChars[0], &uChars[1], &uChars[2], &uChars[3] };
+	AVX256<uint8_t*> avxUCharPtrs{ uCharPtrs }; // 'AVX256': class template cannot be constructed */
 }
 
 void testAVX256SubscriptOperator()

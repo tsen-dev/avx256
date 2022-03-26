@@ -1,6 +1,8 @@
 #ifndef AVX256_H
 #define AVX256_H
 
+#include <type_traits>
+
 class AVX256Utils
 {
 public:
@@ -11,13 +13,16 @@ private:
 	static bool HasCPUIDSupport(void);	
 };
 
-template <typename T>
+template <typename T, typename = std::enable_if_t<std::is_fundamental_v<T> && !std::is_void_v<T>>>
 class AVX256
 {
 public:
-	AVX256(T* data) : Data{ data } {}
+	AVX256(T* data) : Data{ data } { }
+
 	T& operator[] (int index) const { return Data[index]; }
-	void Next() { Data += (256 / 8) / sizeof(T); } // check assembly to see if adding a constant or run-time dividing
+	
+	void Next() { Data += (256 / 8) / sizeof(T); } 
+	
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
 	friend void testAVX256Constructor();
