@@ -47,7 +47,6 @@ void testAVX256Constructor()
 	void* voids;
 	AVX256<void> avxVoid{ voids }; // 'AVX256': class template cannot be constructed
 
-
 	class X {};
 	X* xs;
 	AVX256<X> avxX{ xs }; // 'AVX256': class template cannot be constructed
@@ -74,6 +73,9 @@ void testAVX256SubscriptOperator()
 			avxLongs[i] == longs[i]
 		);
 	}
+
+	avxDoubles[0] = 100;
+	assert(avxDoubles[0] == 100);
 }
 
 void testAVX256PrintOperator()
@@ -140,6 +142,72 @@ void testAVX256NextandPrevious()
 	for (int i = 0; i < 32; ++i) assert(avxUChars[i] == uChars[i]);
 }
 
+void testAVX256PlusEqualsOperator()
+{
+	int64_t myLongs0[4] = { INT64_MAX, INT64_MAX - 1, INT64_MIN, INT64_MIN + 1};
+	int64_t myLongs1[4] = { 0, 3, 0, -3 };
+	int64_t myLongsResults[4] = { INT64_MAX, INT64_MIN + 1, INT64_MIN, INT64_MAX - 1 };
+
+	uint64_t myULongs0[4] = { UINT64_MAX, UINT64_MAX - 1, 0, 10};
+	uint64_t myULongs1[4] = { 0, 3, 5, 6};
+	uint64_t myULongsResults[4] = { UINT64_MAX, 1, 5, 16 };
+
+	int32_t myInts0[8] = { INT32_MAX, INT32_MAX - 1, INT32_MIN, INT32_MIN + 1, INT32_MAX, INT32_MAX - 1, INT32_MIN, INT32_MIN + 1 };
+	int32_t myInts1[8] = { 0, 3, 0, -3, 0, 3, 0, -3 };
+	int32_t myIntsResults[8] = { INT32_MAX, INT32_MIN + 1, INT32_MIN, INT32_MAX - 1, INT32_MAX, INT32_MIN + 1, INT32_MIN, INT32_MAX - 1 };
+
+	uint32_t myUInts0[8] = { UINT32_MAX, UINT32_MAX - 1, 0, 10, UINT32_MAX, UINT32_MAX - 1, 0, 10 };
+	uint32_t myUInts1[8] = { 0, 3, 5, 6, 0, 3, 5, 6};
+	uint32_t myUIntsResults[8] = { UINT32_MAX, 1, 5, 16, UINT32_MAX, 1, 5, 16 };
+
+	int16_t myShorts0[16] = { INT16_MAX, INT16_MAX - 1, INT16_MIN, INT16_MIN + 1, 0, 1, 2, 3, INT16_MAX, INT16_MAX - 1, INT16_MIN, INT16_MIN + 1, 0, 1, 2, 3 };
+	int16_t myShorts1[16] = { 0, 3, 0, -3, 1, -2, 3, -3, 0, 3, 0, -3, 1, -2, 3, -3 };
+	int16_t myShortsResults[16] = { INT16_MAX, INT16_MAX, INT16_MIN, INT16_MIN, 1, -1, 5, 0, INT16_MAX, INT16_MAX, INT16_MIN, INT16_MIN, 1, -1, 5, 0 };
+
+	uint16_t myUShorts0[16] = { UINT16_MAX, UINT16_MAX - 1, 0, 1, 2, 3, 4, 5, UINT16_MAX, UINT16_MAX - 1, 0, 1, 2, 3, 4, 5 };
+	uint16_t myUShorts1[16] = { 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6 };
+	uint16_t myUShortsResults[16] = { UINT16_MAX, UINT16_MAX, 1, 3, 5, 7, 9, 11, UINT16_MAX, UINT16_MAX, 1, 3, 5, 7, 9, 11 };
+
+	int8_t myChars0[32] = { INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3, INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3,
+							INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3,  INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3 };
+	int8_t myChars1[32] = { 0, 3, 0, -3, 1, -2, 3, -3, 0, 3, 0, -3, 1, -2, 3, -3, 0, 3, 0, -3, 1, -2, 3, -3, 0, 3, 0, -3, 1, -2, 3, -3 };
+	int8_t myCharsResults[32] = { INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0,  INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0,
+								  INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0,  INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0 };
+
+	uint8_t myUChars0[32] = { UINT8_MAX, UINT8_MAX - 1, 0, 1, 2, 3, 4, 5, UINT8_MAX, UINT8_MAX - 1, 0, 1, 2, 3, 4, 5,
+							  UINT8_MAX, UINT8_MAX - 1, 0, 1, 2, 3, 4, 5, UINT8_MAX, UINT8_MAX - 1, 0, 1, 2, 3, 4, 5 };
+	uint8_t myUChars1[32] = { 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6 };
+	uint8_t myUCharsResults[32] = { UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11, UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11,
+									UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11, UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11 };
+
+	AVX256<int64_t> avxLongs0{ myLongs0 }, avxLongs1{ myLongs1 };
+	AVX256<uint64_t> avxULongs0{ myULongs0 }, avxULongs1{ myULongs1 };
+	AVX256<int32_t> avxInts0{ myInts0 }, avxInts1{ myInts1 };
+	AVX256<uint32_t> avxUInts0{ myUInts0 }, avxUInts1{ myUInts1 };
+	AVX256<int16_t> avxShorts0{ myShorts0 }, avxShorts1{ myShorts1 };
+	AVX256<uint16_t> avxUShorts0{ myUShorts0 }, avxUShorts1{ myUShorts1 };
+	AVX256<int8_t> avxChars0{ myChars0 }, avxChars1{ myChars1 };
+	AVX256<uint8_t> avxUChars0{ myUChars0 }, avxUChars1{ myUChars1 };
+
+	avxLongs0 += avxLongs1;
+	avxULongs0 += avxULongs1;
+	avxInts0 += avxInts1;
+	avxUInts0 += avxUInts1;
+	avxShorts0 += avxShorts1;
+	avxUShorts0 += avxUShorts1;
+	avxChars0 += avxChars1;
+	avxUChars0 += avxUChars1;
+
+	assert(std::equal(std::begin(myLongs0), std::end(myLongs0), myLongsResults));
+	assert(std::equal(std::begin(myULongs0), std::end(myULongs0), myULongsResults));
+	assert(std::equal(std::begin(myInts0), std::end(myInts0), myIntsResults));
+	assert(std::equal(std::begin(myUInts0), std::end(myUInts0), myUIntsResults));
+	assert(std::equal(std::begin(myShorts0), std::end(myShorts0), myShortsResults));
+	assert(std::equal(std::begin(myUShorts0), std::end(myUShorts0), myUShortsResults));
+	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
+	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -148,6 +216,7 @@ void runTests()
 	testAVX256SubscriptOperator();
 	testAVX256PrintOperator();
 	testAVX256NextandPrevious();
+	testAVX256PlusEqualsOperator();
 }
 
 int main()

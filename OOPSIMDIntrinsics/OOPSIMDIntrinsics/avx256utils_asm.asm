@@ -1,6 +1,6 @@
 .code
 
-?HasCPUIDSupport@AVX256Utils@@CA_NXZ proc
+HasCPUIDSupport proc
 	; Read flags into RAX
 	pushfq           
 	pop rax          
@@ -20,12 +20,12 @@
 	mov rcx, 1
 	cmovc rax, rcx 
 	ret
-?HasCPUIDSupport@AVX256Utils@@CA_NXZ endp
+HasCPUIDSupport endp
 
 
-?HasAVXSupport@AVX256Utils@@SA_NXZ proc
+HasAVXSupport proc
 	; Return early if CPU does not support CPUID
-	call ?HasCPUIDSupport@AVX256Utils@@CA_NXZ
+	call HasCPUIDSupport
 	cmp rax, 0
 	jne SupportsCPUID
 	ret
@@ -41,6 +41,6 @@
 	bt ecx, 28
 	cmovc rax, rdx
 	ret
-?HasAVXSupport@AVX256Utils@@SA_NXZ endp
+HasAVXSupport endp
 
 end
