@@ -20,6 +20,15 @@ namespace
 	extern "C" void Add8(uint8_t * source, uint8_t * operand);
 	extern "C" void Add8Saturate(int8_t * source, int8_t * operand);
 	extern "C" void Add8USaturate(uint8_t * source, uint8_t * operand);
+
+	extern "C" void Sub64(uint64_t * source, uint64_t * operand);
+	extern "C" void Sub32(uint32_t * source, uint32_t * operand);
+	extern "C" void Sub16(uint16_t * source, uint16_t * operand);
+	extern "C" void Sub16SaturateSigned(int16_t * source, int16_t * operand);
+	extern "C" void Sub16SaturateUnsigned(uint16_t * source, uint16_t * operand);
+	extern "C" void Sub8(uint8_t * source, uint8_t * operand);
+	extern "C" void Sub8SaturateSigned(int8_t * source, int8_t * operand);
+	extern "C" void Sub8SaturateUnsigned(uint8_t * source, uint8_t * operand);
 }
 
 void testHasCPUIDSupport()
@@ -213,6 +222,61 @@ void testAVX256Add()
 	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
 }
 
+void testAVX256Sub()
+{
+	int64_t myLongs0[4] = { INT64_MAX, INT64_MAX - 1, INT64_MIN, INT64_MIN + 1 };
+	int64_t myLongs1[4] = { 0, -3, 0, 3 };
+	int64_t myLongsResults[4] = { INT64_MAX, INT64_MIN + 1, INT64_MIN, INT64_MAX - 1 };
+
+	uint64_t myULongs0[4] = { UINT64_MAX, UINT64_MAX - 1, 0, 10 };
+	uint64_t myULongs1[4] = { 0, 3, 5, 6 };
+	uint64_t myULongsResults[4] = { UINT64_MAX, UINT64_MAX - 4, UINT64_MAX - 4, 4 };
+
+	int32_t myInts0[8] = { INT32_MAX, INT32_MAX - 1, INT32_MIN, INT32_MIN + 1, INT32_MAX, INT32_MAX - 1, INT32_MIN, INT32_MIN + 1 };
+	int32_t myInts1[8] = { 0, -3, 0, 3, 0, -3, 0, 3 };
+	int32_t myIntsResults[8] = { INT32_MAX, INT32_MIN + 1, INT32_MIN, INT32_MAX - 1, INT32_MAX, INT32_MIN + 1, INT32_MIN, INT32_MAX - 1 };
+
+	uint32_t myUInts0[8] = { UINT32_MAX, UINT32_MAX - 1, 0, 10, UINT32_MAX, UINT32_MAX - 1, 0, 10 };
+	uint32_t myUInts1[8] = { 0, 3, 5, 6, 0, 3, 5, 6 };
+	uint32_t myUIntsResults[8] = { UINT32_MAX, UINT32_MAX - 4, UINT32_MAX - 4, 4, UINT32_MAX, UINT32_MAX - 4, UINT32_MAX - 4, 4 };
+
+	int16_t myShorts0[16] = { INT16_MAX, INT16_MAX - 1, INT16_MIN, INT16_MIN + 1, 0, 1, 2, 3, INT16_MAX, INT16_MAX - 1, INT16_MIN, INT16_MIN + 1, 0, 1, 2, 3 };
+	int16_t myShorts1[16] = { 0, -3, 0, 3, -1, 2, -3, 3, 0, -3, 0, 3, -1, 2, -3, 3 };
+	int16_t myShortsResults[16] = { INT16_MAX, INT16_MAX, INT16_MIN, INT16_MIN, 1, -1, 5, 0, INT16_MAX, INT16_MAX, INT16_MIN, INT16_MIN, 1, -1, 5, 0 };
+
+	uint16_t myUShorts0[16] = { 0, 1, 2, 4, 6, 8, 10, 12, 0, 1, 2, 4, 6, 8, 10, 12 };
+	uint16_t myUShorts1[16] = { 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6 };
+	uint16_t myUShortsResults[16] = { 0, 0, 1, 2, 3, 4, 5, 6, 0, 0, 1, 2, 3, 4, 5, 6 };
+
+	int8_t myChars0[32] = { INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3, INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3, 
+							INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3, INT8_MAX, INT8_MAX - 1, INT8_MIN, INT8_MIN + 1, 0, 1, 2, 3 };
+	int8_t myChars1[32] = { 0, -3, 0, 3, -1, 2, -3, 3, 0, -3, 0, 3, -1, 2, -3, 3, 0, -3, 0, 3, -1, 2, -3, 3, 0, -3, 0, 3, -1, 2, -3, 3 };
+	int8_t myCharsResults[32] = { INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0, INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0,
+								  INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0, INT8_MAX, INT8_MAX, INT8_MIN, INT8_MIN, 1, -1, 5, 0 };
+
+	uint8_t myUChars0[32] = { 0, 1, 2, 4, 6, 8, 10, 12, 0, 1, 2, 4, 6, 8, 10, 12, 0, 1, 2, 4, 6, 8, 10, 12, 0, 1, 2, 4, 6, 8, 10, 12 };
+	uint8_t myUChars1[32] = { 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6, 0, 3, 1, 2, 3, 4, 5, 6 };
+	uint8_t myUCharsResults[32] = { 0, 0, 1, 2, 3, 4, 5, 6, 0, 0, 1, 2, 3, 4, 5, 6, 0, 0, 1, 2, 3, 4, 5, 6, 0, 0, 1, 2, 3, 4, 5, 6 };
+
+	Sub64(reinterpret_cast<uint64_t*>(myLongs0), reinterpret_cast<uint64_t*>(myLongs1));
+	Sub64(myULongs0, myULongs1);
+	Sub32(reinterpret_cast<uint32_t*>(myInts0), reinterpret_cast<uint32_t*>(myInts1));
+	Sub32(myUInts0, myUInts1);
+	Sub16SaturateSigned(myShorts0, myShorts1);
+	Sub16SaturateUnsigned(myUShorts0, myUShorts1);
+	Sub8SaturateSigned(myChars0, myChars1);
+	Sub8SaturateUnsigned(myUChars0, myUChars1);
+
+	assert(std::equal(std::begin(myLongs0), std::end(myLongs0), myLongsResults));
+	assert(std::equal(std::begin(myULongs0), std::end(myULongs0), myULongsResults));
+	assert(std::equal(std::begin(myInts0), std::end(myInts0), myIntsResults));
+	assert(std::equal(std::begin(myUInts0), std::end(myUInts0), myUIntsResults));
+	assert(std::equal(std::begin(myShorts0), std::end(myShorts0), myShortsResults));
+	assert(std::equal(std::begin(myUShorts0), std::end(myUShorts0), myUShortsResults));
+	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
+	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -222,6 +286,7 @@ void runTests()
 	testAVX256PrintOperator();
 	testAVX256NextandPrevious();
 	testAVX256Add();
+	testAVX256Sub();
 }
 
 int main()
