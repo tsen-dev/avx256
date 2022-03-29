@@ -21,19 +21,19 @@ Add16 proc
 	ret
 Add16 endp
 
-Add16Saturate proc
+Add16SaturateSigned proc
 	vmovdqu ymm0, ymmword ptr [rcx]
 	vpaddsw ymm0, ymm0, ymmword ptr [rdx]
 	vmovdqu ymmword ptr [rcx], ymm0
 	ret
-Add16Saturate endp
+Add16SaturateSigned endp
 
-Add16USaturate proc
+Add16SaturateUnsigned proc
 	vmovdqu ymm0, ymmword ptr [rcx]
 	vpaddusw ymm0, ymm0, ymmword ptr [rdx]
 	vmovdqu ymmword ptr [rcx], ymm0
 	ret
-Add16USaturate endp
+Add16SaturateUnsigned endp
 
 Add8 proc
 	vmovdqu ymm0, ymmword ptr [rcx]
@@ -42,18 +42,18 @@ Add8 proc
 	ret
 Add8 endp
 
-Add8Saturate proc
+Add8SaturateSigned proc
 	vmovdqu ymm0, ymmword ptr [rcx]
 	vpaddsb ymm0, ymm0, ymmword ptr [rdx]
 	vmovdqu ymmword ptr [rcx], ymm0
 	ret
-Add8Saturate endp
+Add8SaturateSigned endp
 
-Add8USaturate proc
+Add8SaturateUnsigned proc
 	vmovdqu ymm0, ymmword ptr [rcx]
 	vpaddusb ymm0, ymm0, ymmword ptr [rdx]
 	vmovdqu ymmword ptr [rcx], ymm0
 	ret
-Add8USaturate endp
+Add8SaturateUnsigned endp
 
 end

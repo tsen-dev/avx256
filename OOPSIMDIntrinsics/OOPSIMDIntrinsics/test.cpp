@@ -8,6 +8,18 @@
 
 #ifdef TEST
 
+namespace
+{
+	extern "C" void Add64(uint64_t * source, uint64_t * operand);
+	extern "C" void Add32(uint32_t * source, uint32_t * operand);
+	extern "C" void Add16(uint16_t * source, uint16_t * operand);
+	extern "C" void Add16Saturate(int16_t * source, int16_t * operand);
+	extern "C" void Add16USaturate(uint16_t * source, uint16_t * operand);
+	extern "C" void Add8(uint8_t * source, uint8_t * operand);
+	extern "C" void Add8Saturate(int8_t * source, int8_t * operand);
+	extern "C" void Add8USaturate(uint8_t * source, uint8_t * operand);
+}
+
 void testHasCPUIDSupport()
 {
 	assert(AVX256Utils::HasCPUIDSupport() == true);
@@ -142,7 +154,7 @@ void testAVX256NextandPrevious()
 	for (int i = 0; i < 32; ++i) assert(avxUChars[i] == uChars[i]);
 }
 
-void testAVX256PlusEqualsOperator()
+void testAVX256Add()
 {
 	int64_t myLongs0[4] = { INT64_MAX, INT64_MAX - 1, INT64_MIN, INT64_MIN + 1};
 	int64_t myLongs1[4] = { 0, 3, 0, -3 };
@@ -180,23 +192,14 @@ void testAVX256PlusEqualsOperator()
 	uint8_t myUCharsResults[32] = { UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11, UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11,
 									UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11, UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11 };
 
-	AVX256<int64_t> avxLongs0{ myLongs0 }, avxLongs1{ myLongs1 };
-	AVX256<uint64_t> avxULongs0{ myULongs0 }, avxULongs1{ myULongs1 };
-	AVX256<int32_t> avxInts0{ myInts0 }, avxInts1{ myInts1 };
-	AVX256<uint32_t> avxUInts0{ myUInts0 }, avxUInts1{ myUInts1 };
-	AVX256<int16_t> avxShorts0{ myShorts0 }, avxShorts1{ myShorts1 };
-	AVX256<uint16_t> avxUShorts0{ myUShorts0 }, avxUShorts1{ myUShorts1 };
-	AVX256<int8_t> avxChars0{ myChars0 }, avxChars1{ myChars1 };
-	AVX256<uint8_t> avxUChars0{ myUChars0 }, avxUChars1{ myUChars1 };
-
-	avxLongs0 += avxLongs1;
-	avxULongs0 += avxULongs1;
-	avxInts0 += avxInts1;
-	avxUInts0 += avxUInts1;
-	avxShorts0 += avxShorts1;
-	avxUShorts0 += avxUShorts1;
-	avxChars0 += avxChars1;
-	avxUChars0 += avxUChars1;
+	Add64(reinterpret_cast<uint64_t*>(myLongs0), reinterpret_cast<uint64_t*>(myLongs1));
+	Add64(myULongs0, myULongs1);
+	Add32(reinterpret_cast<uint32_t*>(myInts0), reinterpret_cast<uint32_t*>(myInts1));
+	Add32(myUInts0, myUInts1);
+	Add16SaturateSigned(myShorts0, myShorts1);
+	Add16SaturateUnsigned(myUShorts0, myUShorts1);
+	Add8SaturateSigned(myChars0, myChars1);
+	Add8SaturateUnsigned(myUChars0, myUChars1);
 
 	assert(std::equal(std::begin(myLongs0), std::end(myLongs0), myLongsResults));
 	assert(std::equal(std::begin(myULongs0), std::end(myULongs0), myULongsResults));
@@ -216,7 +219,7 @@ void runTests()
 	testAVX256SubscriptOperator();
 	testAVX256PrintOperator();
 	testAVX256NextandPrevious();
-	testAVX256PlusEqualsOperator();
+	testAVX256Add();
 }
 
 int main()
