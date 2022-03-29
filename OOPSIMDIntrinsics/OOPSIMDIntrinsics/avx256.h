@@ -6,8 +6,7 @@
 
 namespace AVX256Utils
 {
-	extern "C" bool HasCPUIDSupport(void);
-	extern "C" bool HasAVXSupport(void);
+	extern "C" bool HasAVX2Support(void);
 };
 
 namespace

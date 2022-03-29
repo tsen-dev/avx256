@@ -10,6 +10,8 @@
 
 namespace
 {
+	extern "C" bool HasCPUIDSupport(void);
+
 	extern "C" void Add64(uint64_t * source, uint64_t * operand);
 	extern "C" void Add32(uint32_t * source, uint32_t * operand);
 	extern "C" void Add16(uint16_t * source, uint16_t * operand);
@@ -22,12 +24,12 @@ namespace
 
 void testHasCPUIDSupport()
 {
-	assert(AVX256Utils::HasCPUIDSupport() == true);
+	assert(HasCPUIDSupport() == true);
 }
 
-void testHasAVXSupport()
+void testHasAVX2Support()
 {
-	assert(AVX256Utils::HasAVXSupport() == true);
+	assert(AVX256Utils::HasAVX2Support() == true);
 }
 
 void testAVX256Constructor()
@@ -214,7 +216,7 @@ void testAVX256Add()
 void runTests()
 {
 	testHasCPUIDSupport();
-	testHasAVXSupport();
+	testHasAVX2Support();
 	testAVX256Constructor();
 	testAVX256SubscriptOperator();
 	testAVX256PrintOperator();
