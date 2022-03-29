@@ -1,5 +1,19 @@
 .code
 
+Add64Double proc
+	vmovupd ymm0, ymmword ptr [rcx]
+	vaddpd ymm0, ymm0, ymmword ptr [rdx]
+	vmovupd ymmword ptr [rcx], ymm0
+	ret
+Add64Double endp
+
+Add32Float proc
+	vmovups ymm0, ymmword ptr [rcx]
+	vaddps ymm0, ymm0, ymmword ptr [rdx]
+	vmovups ymmword ptr [rcx], ymm0
+	ret
+Add32Float endp
+
 Add64 proc
 	vmovdqu ymm0, ymmword ptr [rcx]
 	vpaddq ymm0, ymm0, ymmword ptr [rdx]

@@ -1,5 +1,19 @@
 .code
 
+Sub64Double proc
+	vmovupd ymm0, ymmword ptr [rcx]
+	vsubpd ymm0, ymm0, ymmword ptr [rdx]
+	vmovupd ymmword ptr [rcx], ymm0
+	ret
+Sub64Double endp
+
+Sub32Float proc
+	vmovups ymm0, ymmword ptr [rcx]
+	vsubps ymm0, ymm0, ymmword ptr [rdx]
+	vmovups ymmword ptr [rcx], ymm0
+	ret
+Sub32Float endp
+
 Sub64 proc
 	vmovdqu ymm0, ymmword ptr [rcx]
 	vpsubq ymm0, ymm0, ymmword ptr [rdx]

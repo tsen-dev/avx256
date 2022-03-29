@@ -11,7 +11,9 @@ namespace AVX256Utils
 
 namespace
 {
-	extern "C" void Add64(uint64_t * source, uint64_t * operand);
+	extern "C" void Add64Double(double * source, double * operand);
+	extern "C" void Add32Float(float* source, float* operand);
+	extern "C" void Add64(uint64_t * source, uint64_t * operand);	
 	extern "C" void Add32(uint32_t * source, uint32_t * operand);
 	extern "C" void Add16(uint16_t * source, uint16_t * operand);
 	extern "C" void Add16SaturateSigned(int16_t * source, int16_t * operand);
@@ -20,7 +22,9 @@ namespace
 	extern "C" void Add8SaturateSigned(int8_t * source, int8_t * operand);
 	extern "C" void Add8SaturateUnsigned(uint8_t * source, uint8_t * operand);
 
-	extern "C" void Sub64(uint64_t * source, uint64_t * operand);
+	extern "C" void Sub64Double(double * source, double * operand);
+	extern "C" void Sub32Float(float* source, float* operand);
+	extern "C" void Sub64(uint64_t * source, uint64_t * operand);	
 	extern "C" void Sub32(uint32_t * source, uint32_t * operand);
 	extern "C" void Sub16(uint16_t * source, uint16_t * operand);
 	extern "C" void Sub16SaturateSigned(int16_t * source, int16_t * operand);
@@ -44,6 +48,9 @@ public:
 	
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
+	AVX256<double>& operator+=(double* operand) { Add64Double(this->Data, operand); return *this; }
+	AVX256<float>& operator+=(float* operand) { Add32Float(this->Data, operand); return *this; }
+
 	AVX256<uint64_t>& operator+=(uint64_t* operand) { Add64(this->Data, operand); return *this; }
 	AVX256<int64_t>& operator+=(int64_t* operand) { Add64(reinterpret_cast<uint64_t*>(this->Data), reinterpret_cast<uint64_t*>(operand)); return *this; }
 
@@ -57,6 +64,9 @@ public:
 	AVX256<int8_t>& operator+=(int8_t* operand) { Add8SaturateSigned(this->Data, operand); return *this; }
 
 
+	AVX256<double>& operator-=(double* operand) { Sub64Double(this->Data, operand); return *this; }
+	AVX256<float>& operator-=(float* operand) { Sub32Float(this->Data, operand); return *this; }
+
 	AVX256<uint64_t>& operator-=(uint64_t* operand) { Sub64(this->Data, operand); return *this; }
 	AVX256<int64_t>& operator-=(int64_t* operand) { Sub64(reinterpret_cast<uint64_t*>(this->Data), reinterpret_cast<uint64_t*>(operand)); return *this; }
 
@@ -68,7 +78,6 @@ public:
 
 	AVX256<uint8_t>& operator-=(uint8_t* operand) { Sub8SaturateUnsigned(this->Data, operand); return *this; }
 	AVX256<int8_t>& operator-=(int8_t* operand) { Sub8SaturateSigned(this->Data, operand); return *this; }
-
 
 	friend void testAVX256Constructor();
 
