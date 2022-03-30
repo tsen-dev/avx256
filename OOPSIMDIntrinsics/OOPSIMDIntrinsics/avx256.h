@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <cstdint>
 #include <initializer_list>
+#include <intrin.h>
 
 namespace AVX256Utils
 {
@@ -51,24 +52,24 @@ public:
 
 	// Addition
 
-	void Add(double* operand) { Add64Double(this->Data, operand); }
-	void Add(float* operand) { Add32Float(this->Data, operand); }
+	void Add(double* operand) { _mm256_storeu_pd(Data, _mm256_add_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
+	void Add(float* operand) { _mm256_storeu_ps(Data, _mm256_add_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
 
-	void Add(uint64_t* operand) { Add64(this->Data, operand); }
-	void Add(int64_t* operand) { Add64(reinterpret_cast<uint64_t*>(this->Data), reinterpret_cast<uint64_t*>(operand)); }
+	void Add(uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+	void Add(int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
 
-	void Add(uint32_t* operand) { Add32(this->Data, operand); }
-	void Add(int32_t* operand) { Add32(reinterpret_cast<uint32_t*>(this->Data), reinterpret_cast<uint32_t*>(operand)); }
+	void Add(uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
+	void Add(int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
 
-	void Add(uint16_t* operand) { Add16(this->Data, operand); }
-	void Add(int16_t* operand) { Add16(reinterpret_cast<uint16_t*>(this->Data), reinterpret_cast<uint16_t*>(operand)); }
-	void AddSaturate(uint16_t* operand) { Add16SaturateUnsigned(this->Data, operand); }
-	void AddSaturate(int16_t* operand) { Add16Saturate(reinterpret_cast<uint16_t*>(this->Data), reinterpret_cast<uint16_t*>(operand)); }
+	void Add(uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void Add(int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void AddSaturate(uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void AddSaturate(int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
 
-	void Add(uint8_t* operand) { Add8(this->Data, operand); }
-	void Add(int8_t* operand) { Add8(reinterpret_cast<uint8_t*>(this->Data), reinterpret_cast<uint8_t*>(operand)); }
-	void AddSaturate(uint8_t* operand) { Add8SaturateUnsigned(this->Data, operand); }
-	void AddSaturate(int8_t* operand) { Add8Saturate(reinterpret_cast<uint8_t*>(this->Data), reinterpret_cast<uint8_t*>(operand)); }
+	void Add(uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void Add(int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void AddSaturate(uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void AddSaturate(int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
 
 	AVX256& operator+=(T* operand) { this->Add(operand); return *this; }
 	void Add(std::initializer_list<T>& operand) { static_assert(operand.size()); this->Add(operand.begin()); }

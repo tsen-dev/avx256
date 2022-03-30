@@ -213,15 +213,25 @@ void testAVX256Add()
 	uint8_t myUCharsResults[32] = { UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11, UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11,
 									UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11, UINT8_MAX, UINT8_MAX, 1, 3, 5, 7, 9, 11 };
 
-	Add64Double(myDoubles0, myDoubles1);
-	Add64(reinterpret_cast<uint64_t*>(myLongs0), reinterpret_cast<uint64_t*>(myLongs1));
-	Add64(myULongs0, myULongs1);
-	Add32(reinterpret_cast<uint32_t*>(myInts0), reinterpret_cast<uint32_t*>(myInts1));
-	Add32(myUInts0, myUInts1);
-	Add16SaturateSigned(myShorts0, myShorts1);
-	Add16SaturateUnsigned(myUShorts0, myUShorts1);
-	Add8SaturateSigned(myChars0, myChars1);
-	Add8SaturateUnsigned(myUChars0, myUChars1);
+	AVX256<double> avxDoubles0{ myDoubles0 };
+	AVX256<uint64_t> avxULongs0{ myULongs0 };
+	AVX256<int64_t> avxLongs0{ myLongs0 };
+	AVX256<uint32_t> avxUInts0{ myUInts0 };
+	AVX256<int32_t> avxInts0{ myInts0 };
+	AVX256<uint16_t> avxUShorts0{ myUShorts0 };
+	AVX256<int16_t> avxShorts0{ myShorts0 };
+	AVX256<uint8_t> avxUChars0{ myUChars0 };
+	AVX256<int8_t> avxChars0{ myChars0 };
+
+	avxDoubles0.Add(myDoubles1);
+	avxULongs0.Add(myULongs1);
+	avxLongs0.Add(myLongs1);
+	avxUInts0.Add(myUInts1);
+	avxInts0.Add(myInts1);
+	avxUShorts0.AddSaturate(myUShorts1);
+	avxShorts0.AddSaturate(myShorts1);
+	avxUChars0.AddSaturate(myUChars1);
+	avxChars0.AddSaturate(myChars1);
 
 	assert(std::equal(std::begin(myDoubles0), std::end(myDoubles0), myDoublesResults));
 	assert(std::equal(std::begin(myLongs0), std::end(myLongs0), myLongsResults));
@@ -309,12 +319,6 @@ void runTests()
 
 int main()
 {
-	uint64_t myints[] = { 1, 2, 3, 4 };
-	AVX256<uint64_t> myavx{ myints };
-	std::cout << myavx << '\n';
-	std::array<uint64_t, 3> x{ 4, 3, 2};
-	myavx.Add({4, 3, 2, 1});
-	std::cout << myavx << '\n';
 	runTests();
 
 	std::cout << "All tests passed\n";
