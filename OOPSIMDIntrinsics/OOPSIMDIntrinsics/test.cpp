@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <sstream>
 
+#include <initializer_list>
+
 #include "test.h"
 #include "avx256.h"
 
@@ -307,6 +309,12 @@ void runTests()
 
 int main()
 {
+	uint64_t myints[] = { 1, 2, 3, 4 };
+	AVX256<uint64_t> myavx{ myints };
+	std::cout << myavx << '\n';
+	std::array<uint64_t, 3> x{ 4, 3, 2};
+	myavx.Add({4, 3, 2, 1});
+	std::cout << myavx << '\n';
 	runTests();
 
 	std::cout << "All tests passed\n";

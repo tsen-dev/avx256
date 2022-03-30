@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <cstdint>
+#include <initializer_list>
 
 namespace AVX256Utils
 {
@@ -48,21 +49,31 @@ public:
 	
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
-	AVX256<double>& operator+=(double* operand) { Add64Double(this->Data, operand); return *this; }
-	AVX256<float>& operator+=(float* operand) { Add32Float(this->Data, operand); return *this; }
+	// Addition
 
-	AVX256<uint64_t>& operator+=(uint64_t* operand) { Add64(this->Data, operand); return *this; }
-	AVX256<int64_t>& operator+=(int64_t* operand) { Add64(reinterpret_cast<uint64_t*>(this->Data), reinterpret_cast<uint64_t*>(operand)); return *this; }
+	void Add(double* operand) { Add64Double(this->Data, operand); }
+	void Add(float* operand) { Add32Float(this->Data, operand); }
 
-	AVX256<uint32_t>& operator+=(uint32_t* operand) { Add32(this->Data, operand); return *this; }
-	AVX256<int32_t>& operator+=(int32_t* operand) { Add32(reinterpret_cast<uint32_t*>(this->Data), reinterpret_cast<uint32_t*>(operand)); return *this; }
+	void Add(uint64_t* operand) { Add64(this->Data, operand); }
+	void Add(int64_t* operand) { Add64(reinterpret_cast<uint64_t*>(this->Data), reinterpret_cast<uint64_t*>(operand)); }
 
-	AVX256<uint16_t>& operator+=(uint16_t* operand) { Add16SaturateUnsigned(this->Data, operand); return *this; }
-	AVX256<int16_t>& operator+=(int16_t* operand) { Add16SaturateSigned(this->Data, operand); return *this; }
+	void Add(uint32_t* operand) { Add32(this->Data, operand); }
+	void Add(int32_t* operand) { Add32(reinterpret_cast<uint32_t*>(this->Data), reinterpret_cast<uint32_t*>(operand)); }
 
-	AVX256<uint8_t>& operator+=(uint8_t* operand) { Add8SaturateUnsigned(this->Data, operand); return *this; }
-	AVX256<int8_t>& operator+=(int8_t* operand) { Add8SaturateSigned(this->Data, operand); return *this; }
+	void Add(uint16_t* operand) { Add16(this->Data, operand); }
+	void Add(int16_t* operand) { Add16(reinterpret_cast<uint16_t*>(this->Data), reinterpret_cast<uint16_t*>(operand)); }
+	void AddSaturate(uint16_t* operand) { Add16SaturateUnsigned(this->Data, operand); }
+	void AddSaturate(int16_t* operand) { Add16Saturate(reinterpret_cast<uint16_t*>(this->Data), reinterpret_cast<uint16_t*>(operand)); }
 
+	void Add(uint8_t* operand) { Add8(this->Data, operand); }
+	void Add(int8_t* operand) { Add8(reinterpret_cast<uint8_t*>(this->Data), reinterpret_cast<uint8_t*>(operand)); }
+	void AddSaturate(uint8_t* operand) { Add8SaturateUnsigned(this->Data, operand); }
+	void AddSaturate(int8_t* operand) { Add8Saturate(reinterpret_cast<uint8_t*>(this->Data), reinterpret_cast<uint8_t*>(operand)); }
+
+	AVX256& operator+=(T* operand) { this->Add(operand); return *this; }
+	void Add(std::initializer_list<T>& operand) { static_assert(operand.size()); this->Add(operand.begin()); }
+
+	// Subtraction
 
 	AVX256<double>& operator-=(double* operand) { Sub64Double(this->Data, operand); return *this; }
 	AVX256<float>& operator-=(float* operand) { Sub32Float(this->Data, operand); return *this; }
