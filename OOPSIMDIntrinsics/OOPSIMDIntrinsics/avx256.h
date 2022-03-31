@@ -11,31 +11,6 @@ namespace AVX256Utils
 	extern "C" bool HasAVX2Support(void);
 };
 
-namespace
-{
-	extern "C" void Add64Double(double * source, double * operand);
-	extern "C" void Add32Float(float* source, float* operand);
-	extern "C" void Add64(uint64_t * source, uint64_t * operand);	
-	extern "C" void Add32(uint32_t * source, uint32_t * operand);
-	extern "C" void Add16(uint16_t * source, uint16_t * operand);
-	extern "C" void Add16SaturateSigned(int16_t * source, int16_t * operand);
-	extern "C" void Add16SaturateUnsigned(uint16_t * source, uint16_t * operand);
-	extern "C" void Add8(uint8_t * source, uint8_t * operand);
-	extern "C" void Add8SaturateSigned(int8_t * source, int8_t * operand);
-	extern "C" void Add8SaturateUnsigned(uint8_t * source, uint8_t * operand);
-
-	extern "C" void Sub64Double(double * source, double * operand);
-	extern "C" void Sub32Float(float* source, float* operand);
-	extern "C" void Sub64(uint64_t * source, uint64_t * operand);	
-	extern "C" void Sub32(uint32_t * source, uint32_t * operand);
-	extern "C" void Sub16(uint16_t * source, uint16_t * operand);
-	extern "C" void Sub16SaturateSigned(int16_t * source, int16_t * operand);
-	extern "C" void Sub16SaturateUnsigned(uint16_t * source, uint16_t * operand);
-	extern "C" void Sub8(uint8_t * source, uint8_t * operand);
-	extern "C" void Sub8SaturateSigned(int8_t * source, int8_t * operand);
-	extern "C" void Sub8SaturateUnsigned(uint8_t * source, uint8_t * operand);
-}
-
 template <typename T, typename = std::enable_if_t<std::is_fundamental_v<T> && !std::is_void_v<T>>>
 class AVX256
 {
@@ -52,44 +27,51 @@ public:
 
 	// Addition
 
-	void Add(double* operand) { _mm256_storeu_pd(Data, _mm256_add_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
-	void Add(float* operand) { _mm256_storeu_ps(Data, _mm256_add_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
+	void Add(const double* operand) { _mm256_storeu_pd(Data, _mm256_add_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
+	void Add(const float* operand) { _mm256_storeu_ps(Data, _mm256_add_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
 
-	void Add(uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
-	void Add(int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+	void Add(const uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+	void Add(const int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
 
-	void Add(uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-	void Add(int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
+	void Add(const uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
+	void Add(const int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
 
-	void Add(uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-	void Add(int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-	void AddSaturate(uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-	void AddSaturate(int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void Add(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void Add(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void AddSaturate(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void AddSaturate(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
 
-	void Add(uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-	void Add(int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-	void AddSaturate(uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-	void AddSaturate(int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void Add(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void Add(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void AddSaturate(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void AddSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
 
-	AVX256& operator+=(T* operand) { this->Add(operand); return *this; }
-	void Add(std::initializer_list<T>& operand) { static_assert(operand.size()); this->Add(operand.begin()); }
+	AVX256& operator+=(const T* operand) { this->Add(operand); return *this; }
+	void Add(std::initializer_list<T> operand) {  this->Add(operand.begin()); }
 
 	// Subtraction
 
-	AVX256<double>& operator-=(double* operand) { Sub64Double(this->Data, operand); return *this; }
-	AVX256<float>& operator-=(float* operand) { Sub32Float(this->Data, operand); return *this; }
+	void Sub(const double* operand) { _mm256_storeu_pd(Data, _mm256_sub_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
+	void Sub(const float* operand) { _mm256_storeu_ps(Data, _mm256_sub_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
 
-	AVX256<uint64_t>& operator-=(uint64_t* operand) { Sub64(this->Data, operand); return *this; }
-	AVX256<int64_t>& operator-=(int64_t* operand) { Sub64(reinterpret_cast<uint64_t*>(this->Data), reinterpret_cast<uint64_t*>(operand)); return *this; }
+	void Sub(const uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_sub_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+	void Sub(const int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_sub_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
 
-	AVX256<uint32_t>& operator-=(uint32_t* operand) { Sub32(this->Data, operand); return *this; }
-	AVX256<int32_t>& operator-=(int32_t* operand) { Sub32(reinterpret_cast<uint32_t*>(this->Data), reinterpret_cast<uint32_t*>(operand)); return *this; }
+	void Sub(const uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_sub_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
+	void Sub(const int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_sub_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
 
-	AVX256<uint16_t>& operator-=(uint16_t* operand) { Sub16SaturateUnsigned(this->Data, operand); return *this; }
-	AVX256<int16_t>& operator-=(int16_t* operand) { Sub16SaturateSigned(this->Data, operand); return *this; }
+	void Sub(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_sub_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void Sub(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_sub_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void SubSaturate(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_subs_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	void SubSaturate(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_subs_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
 
-	AVX256<uint8_t>& operator-=(uint8_t* operand) { Sub8SaturateUnsigned(this->Data, operand); return *this; }
-	AVX256<int8_t>& operator-=(int8_t* operand) { Sub8SaturateSigned(this->Data, operand); return *this; }
+	void Sub(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_sub_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void Sub(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_sub_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void SubSaturate(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_subs_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+	void SubSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_subs_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+
+	AVX256& operator-=(const T* operand) { this->Sub(operand); return *this; }
+	void Sub(std::initializer_list<T> operand) { this->Sub(operand.begin()); }
 
 	friend void testAVX256Constructor();
 
