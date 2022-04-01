@@ -294,6 +294,82 @@ void testAVX256Sub()
 	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
 }
 
+void testAVX256Mul()
+{
+	double myDoubles0[4] = { 0, 10.5, -2.8, -100.5 };
+	double myDoubles1[4] = { 0, 2, 0.5, -10 };
+	double myDoublesResults[4] = { 0, 21, -1.4, 1005 };
+
+	int64_t myLongs0[4] = { 10, -10, 10, static_cast<int64_t>(0xFFFFFFFF00000004)};
+	int64_t myLongs1[4] = { -10, -10, 10, 2 };
+	int64_t myLongsResults[4] = { -100, 100, 100, 8 };
+
+	uint64_t myULongs0[4] = { static_cast<uint64_t>(1) << 31, static_cast<uint64_t>(1) << 32, 10, 10 };
+	uint64_t myULongs1[4] = { 2, 2, 10, 0 };
+	uint64_t myULongsResults[4] = { static_cast<uint64_t>(1) << 32, 0, 100, 0 };
+
+	int32_t myInts0[8] = { static_cast<int32_t>(1) << 31, static_cast<int32_t>(1) << 30, 10, -10, 10, -10, 10, -10 };
+	int32_t myInts1[8] = { 2, 2, 10, -10, -10, 10, 10, -10 };
+	int32_t myIntsResults[8] = { 0, static_cast<int32_t>(1) << 31, 100, 100, -100, -100, 100, 100 };
+
+	uint32_t myUInts0[8] = { static_cast<uint32_t>(1) << 31, static_cast<uint32_t>(1) << 30, 10, 10, static_cast<uint32_t>(1) << 31, static_cast<uint32_t>(1) << 30, 10, 10 };
+	uint32_t myUInts1[8] = { 2, 2, 10, 0, 2, 2, 10, 0 };
+	uint32_t myUIntsResults[8] = { 0, static_cast<uint32_t>(1) << 31, 100, 0, 0, static_cast<uint32_t>(1) << 31, 100, 0 };
+
+	int16_t myShorts0[16] = { 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10, 10, -10 };
+	int16_t myShorts1[16] = { -10, 10, 10, -10, -10, 10, 10, -10, -10, 10, 10, -10, -10, 10, 10, -10 };
+	int16_t myShortsResults[16] = { -100, -100, 100, 100, -100, -100, 100, 100, -100, -100, 100, 100, -100, -100, 100, 100 };
+
+	uint16_t myUShorts0[16] = { static_cast<uint16_t>(0x8002), 10, 10, 100, static_cast<uint16_t>(0x8002), 10, 10, 100, 
+								static_cast<uint16_t>(0x8002), 10, 10, 100, static_cast<uint16_t>(0x8002), 10, 10, 100 };
+	uint16_t myUShorts1[16] = { 2, 10, 0, 10, 2, 10, 0, 10, 2, 10, 0, 10, 2, 10, 0, 10 };
+	uint16_t myUShortsResults[16] = { 4, 100, 0, 1000, 4, 100, 0, 1000, 4, 100, 0, 1000, 4, 100, 0, 1000 };
+
+	int8_t myChars0[32] = { 10, -10, 10, -10, 100, -100, 100, -100, 10, -10, 10, -10, 100, -100, 100, -100,
+							10, -10, 10, -10, 100, -100, 100, -100, 10, -10, 10, -10, 100, -100, 100, -100 };
+	int8_t myChars1[32] = { -10, 10, 10, -10, -10, 10, 10, -10, -10, 10, 10, -10, -10, 10, 10, -10,
+							-10, 10, 10, -10, -10, 10, 10, -10, -10, 10, 10, -10, -10, 10, 10, -10 };
+	int8_t myCharsResults[32] = { -100, -100, 100, 100, INT8_MIN, INT8_MIN, INT8_MAX, INT8_MAX, -100, -100, 100, 100, INT8_MIN, INT8_MIN, INT8_MAX, INT8_MAX,
+								  -100, -100, 100, 100, INT8_MIN, INT8_MIN, INT8_MAX, INT8_MAX, -100, -100, 100, 100, INT8_MIN, INT8_MIN, INT8_MAX, INT8_MAX };
+
+	uint8_t myUChars0[32] = { 1, 10, 100, 200, 1, 10, 100, 200, 1, 10, 100, 200, 1, 10, 100, 200, 
+							  1, 10, 100, 200, 1, 10, 100, 200, 1, 10, 100, 200, 1, 10, 100, 200 };
+	uint8_t myUChars1[32] = { 0, 10, 2, 2, 0, 10, 2, 2, 0, 10, 2, 2, 0, 10, 2, 2,
+							  0, 10, 2, 2, 0, 10, 2, 2, 0, 10, 2, 2, 0, 10, 2, 2 };
+	uint8_t myUCharsResults[32] = { 0, 100, 200, UINT8_MAX, 0, 100, 200, UINT8_MAX, 0, 100, 200, UINT8_MAX, 0, 100, 200, UINT8_MAX,
+									0, 100, 200, UINT8_MAX, 0, 100, 200, UINT8_MAX, 0, 100, 200, UINT8_MAX, 0, 100, 200, UINT8_MAX };
+
+	AVX256<double> avxDoubles0{ myDoubles0 };
+	AVX256<uint64_t> avxULongs0{ myULongs0 };
+	AVX256<int64_t> avxLongs0{ myLongs0 };
+	AVX256<uint32_t> avxUInts0{ myUInts0 };
+	AVX256<int32_t> avxInts0{ myInts0 };
+	AVX256<uint16_t> avxUShorts0{ myUShorts0 };
+	AVX256<int16_t> avxShorts0{ myShorts0 };
+	AVX256<uint8_t> avxUChars0{ myUChars0 };
+	AVX256<int8_t> avxChars0{ myChars0 };
+
+	avxDoubles0.Mul(myDoubles1);
+	avxULongs0.Mul(myULongs1);
+	avxLongs0.Mul(myLongs1);
+	avxUInts0.Mul(myUInts1);
+	avxInts0.Mul(myInts1);
+	avxUShorts0.Mul(myUShorts1);
+	avxShorts0.Mul(myShorts1);
+	avxUChars0.Mul(myUChars1);
+	avxChars0.Mul(myChars1);
+
+	assert(std::equal(std::begin(myDoubles0), std::end(myDoubles0), myDoublesResults));
+	assert(std::equal(std::begin(myLongs0), std::end(myLongs0), myLongsResults));
+	assert(std::equal(std::begin(myULongs0), std::end(myULongs0), myULongsResults));
+	assert(std::equal(std::begin(myInts0), std::end(myInts0), myIntsResults));
+	assert(std::equal(std::begin(myUInts0), std::end(myUInts0), myUIntsResults));
+	assert(std::equal(std::begin(myShorts0), std::end(myShorts0), myShortsResults));
+	assert(std::equal(std::begin(myUShorts0), std::end(myUShorts0), myUShortsResults));
+	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
+	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -304,6 +380,7 @@ void runTests()
 	testAVX256NextandPrevious();
 	testAVX256Add();
 	testAVX256Sub();
+	testAVX256Mul();
 }
 
 int main()
@@ -311,11 +388,6 @@ int main()
 	runTests();
 
 	std::cout << "All tests passed\n";
-
-	int64_t myLongs[4] = { 1, 2, 3, 4 };
-	AVX256<int64_t> avxLongs = { myLongs };
-	avxLongs.Add({ 4, 3, 2, 1 });
-	std::cout << avxLongs;
 
 	return 0;
 }

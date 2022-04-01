@@ -47,7 +47,7 @@ public:
 	void AddSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
 
 	AVX256& operator+=(const T* operand) { this->Add(operand); return *this; }
-	void Add(std::initializer_list<T> operand) {  this->Add(operand.begin()); }
+	void Add(std::initializer_list<T> operand) { this->Add(operand.begin()); }
 
 	// Subtraction
 
@@ -72,6 +72,73 @@ public:
 
 	AVX256& operator-=(const T* operand) { this->Sub(operand); return *this; }
 	void Sub(std::initializer_list<T> operand) { this->Sub(operand.begin()); }
+
+	// Multiplication
+
+	void Mul(const double* operand) { _mm256_storeu_pd(Data, _mm256_mul_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
+	void Mul(const float* operand) { _mm256_storeu_ps(Data, _mm256_mul_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
+	
+	// Multiply the unsigned low 32-bits of each 64-bit element
+	void Mul(const uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_mul_epu32(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+	// Multiply the signed low 32-bits of each 64-bit element
+	void Mul(const int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_mul_epi32(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+
+	// Multiply unsigned 32-bit elements, save the low 32-bits of the result
+	void Mul(const uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_mullo_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
+	// Multiply signed 32-bit elements, save the low 32-bits of the result
+	void Mul(const int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_mullo_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
+
+	// Multiply unsigned 16-bit elements, save the low 16-bits of the result
+	void Mul(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_mullo_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	// Multiply signed 16-bit elements, save the low 16-bits of the result
+	void Mul(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_mullo_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+	
+	// Multiply unsigned 8-bit elements, save the low 8-bits of the result (which is unsigned saturated before saving)
+	void Mul(const uint8_t* operand) 
+	{ 
+		_mm256_storeu_epi8(
+			Data, 
+			_mm256_packus_epi16(
+				_mm256_mullo_epi16(
+					_mm256_unpacklo_epi8(_mm256_loadu_epi8(Data), _mm256_set1_epi8(0)), 
+					_mm256_unpacklo_epi8(_mm256_loadu_epi8(operand), _mm256_set1_epi8(0))
+				),
+				_mm256_mullo_epi16(
+					_mm256_unpackhi_epi8(_mm256_loadu_epi8(Data), _mm256_set1_epi8(0)),
+					_mm256_unpackhi_epi8(_mm256_loadu_epi8(operand), _mm256_set1_epi8(0))
+				)
+			)
+		); 
+	}
+	// Multiply signed 8-bit elements, save the low 8-bits of the result (which is signed saturated before saving)
+	void Mul(const int8_t* operand) 
+	{ 
+		_mm256_storeu_epi8(
+			Data,
+			_mm256_packs_epi16(
+				_mm256_mullo_epi16(
+					_mm256_unpacklo_epi8(_mm256_loadu_epi8(Data), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(Data))),
+					_mm256_unpacklo_epi8(_mm256_loadu_epi8(operand), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(operand)))
+				),
+				_mm256_mullo_epi16(
+					_mm256_unpackhi_epi8(_mm256_loadu_epi8(Data), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(Data))),
+					_mm256_unpackhi_epi8(_mm256_loadu_epi8(operand), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(operand)))
+				)
+			)
+		);
+	}
+
+	// Call the Mul() method. For details its this operation, see the Mul() method for the AVX256 type being used.
+	AVX256& operator*=(const T* operand) { this->Mul(operand); return *this; }
+	void Mul(std::initializer_list<T> operand) { this->Mul(operand.begin()); }
+
+	// Division
+
+	void Div(const double* operand) { _mm256_storeu_pd(Data, _mm256_div_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
+	void Div(const float* operand) { _mm256_storeu_ps(Data, _mm256_div_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
+
+	AVX256& operator/=(const T* operand) { this->Div(operand); return *this; }
+	void Div(std::initializer_list<T> operand) { this->Div(operand.begin()); }
 
 	friend void testAVX256Constructor();
 
