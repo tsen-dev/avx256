@@ -372,6 +372,26 @@ void testAVX256Mul()
 	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
 }
 
+void testAVX256Div()
+{
+	double myDoubles0[4] = { 0, 10.5, -10.5, -21 };
+	double myDoubles1[4] = { 2, 2, -4, 2 };
+	double myDoublesResults[4] = { 0, 5.25, 2.625, -10.5 };
+
+	float myFloats0[8] = { 0, 10.5, -10.5, -21, 0, 10.5, -10.5, -21 };
+	float myFloats1[8] = { 2, 2, -4, 2, 2, 2, -4, 2 };
+	float myFloatsResults[8] = { 0, 5.25, 2.625, -10.5, 0, 5.25, 2.625, -10.5 };
+
+	AVX256<double> avxDoubles0{ myDoubles0 };
+	AVX256<float> avxFloats0{ myFloats0 };
+
+	avxDoubles0.Div(myDoubles1);
+	avxFloats0.Div(myFloats1);
+
+	assert(std::equal(std::begin(myDoubles0), std::end(myDoubles0), myDoublesResults));
+	assert(std::equal(std::begin(myFloats0), std::end(myFloats0), myFloatsResults));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -383,6 +403,7 @@ void runTests()
 	testAVX256Add();
 	testAVX256Sub();
 	testAVX256Mul();
+	testAVX256Div();
 }
 
 int main()
@@ -390,25 +411,6 @@ int main()
 	runTests();
 
 	std::cout << "All tests passed\n";
-
-	uint8_t myChars1[32];
-	uint8_t myChars2[32];
-	uint32_t myInts1[32];
-	
-	for (int i = 0; i < 32; ++i)
-	{
-		myChars1[i] = 'C';
-		myChars2[i] = 2;
-		myInts1[i] = 6;
-	}
-
-	AVX256<uint8_t> avxChars{ myChars1 };
-	AVX256<uint32_t> avxInts{ myInts1 };
-
-	avxChars += {200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
-	avxInts += {1, 2, 3, 4, 5, 6, 7, 8};
-
-	std::cout << static_cast<int>(avxChars[0]) << ' ' << avxInts << '\n';
 
 	return 0;
 }

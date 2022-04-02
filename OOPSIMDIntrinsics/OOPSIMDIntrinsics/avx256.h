@@ -240,8 +240,6 @@ public:
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Div(const std::array<T, 32 / sizeof(T)>& operand) { this->Div(&operand[0]); }
 
-	friend void testAVX256Constructor();
-
 private:
 	void DefaultAdd(const T* operand, std::true_type) { this->Add(operand); }
 	void DefaultAdd(const T* operand, std::false_type) { this->AddSaturate(operand); }
