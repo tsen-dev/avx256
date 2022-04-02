@@ -5,6 +5,8 @@
 
 #include <initializer_list>
 
+#include <array>
+
 #include "test.h"
 #include "avx256.h"
 
@@ -388,6 +390,29 @@ int main()
 	runTests();
 
 	std::cout << "All tests passed\n";
+
+	uint8_t myChars1[32];
+	uint8_t myChars2[32];
+	uint32_t myInts1[32];
+	
+	for (int i = 0; i < 32; ++i)
+	{
+		myChars1[i] = 'C';
+		myChars2[i] = 2;
+		myInts1[i] = 6;
+	}
+
+	AVX256<uint8_t> avxChars{ myChars1 };
+	AVX256<uint32_t> avxInts{ myInts1 };
+
+	avxChars -= {200, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,};
+	avxInts -= {1, 2, 3, 4, 5, 6, 7, 8};
+
+	std::cout << static_cast<int>(avxChars[0]) << ' ' << avxInts << '\n';
+
+	/*const std::initializer_list<int32_t> initInts{ 1,2,3,4,5,6,7,8 };
+	std::array<int32_t, 8> intArray{ initInts };
+	for (int x : intArray) std::cout << x << ' ';*/
 
 	return 0;
 }
