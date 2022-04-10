@@ -72,13 +72,13 @@ public:
 	void AddSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator+=(const T* operand) { this->DefaultAdd(operand, std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
+	AVX256& operator+=(const T* operand) { DefaultAdd(operand, std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator+=(const std::array<T, 32 / sizeof(T)>& operand) { this->DefaultAdd(&operand[0], std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
+	AVX256& operator+=(const std::array<T, 32 / sizeof(T)>& operand) { DefaultAdd(&operand[0], std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Add(const std::array<T, 32 / sizeof(T)>& operand) { this->Add(&operand[0]); }
+	void Add(const std::array<T, 32 / sizeof(T)>& operand) { Add(&operand[0]); }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void AddSatuate(const std::array<T, 32 / sizeof(T)>& operand) { this->AddSatuate(&operand[0]); }
+	void AddSatuate(const std::array<T, 32 / sizeof(T)>& operand) { AddSatuate(&operand[0]); }
 
 
 	// Subtraction
@@ -125,13 +125,13 @@ public:
 	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
 	void SubSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_subs_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
 
-	AVX256& operator-=(const T* operand) { this->DefaultSub(operand, std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
+	AVX256& operator-=(const T* operand) { DefaultSub(operand, std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator-=(const std::array<T, 32 / sizeof(T)>& operand) { this->DefaultSub(&operand[0], std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
+	AVX256& operator-=(const std::array<T, 32 / sizeof(T)>& operand) { DefaultSub(&operand[0], std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Sub(const std::array<T, 32 / sizeof(T)>& operand) { this->Sub(&operand[0]); }
+	void Sub(const std::array<T, 32 / sizeof(T)>& operand) { Sub(&operand[0]); }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void SubSatuate(const std::array<T, 32 / sizeof(T)>& operand) { this->SubSatuate(&operand[0]); }
+	void SubSatuate(const std::array<T, 32 / sizeof(T)>& operand) { SubSatuate(&operand[0]); }
 
 	
 	// Multiplication
@@ -205,11 +205,11 @@ public:
 	}
 
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used.
-	AVX256& operator*=(const T* operand) { this->Mul(operand); return *this; }
+	AVX256& operator*=(const T* operand) { Mul(operand); return *this; }
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { this->Mul(&operand[0]); return *this; }
+	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); return *this; }
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Mul(const std::array<T, 32 / sizeof(T)>& operand) { this->Mul(&operand[0]); }
+	void Mul(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); }
 
 
 	// Division
@@ -220,11 +220,11 @@ public:
 	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
 	void Div(const float* operand) { _mm256_storeu_ps(Data, _mm256_div_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
 
-	AVX256& operator/=(const T* operand) { this->Div(operand); return *this; }
+	AVX256& operator/=(const T* operand) { Div(operand); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { this->Div(&operand[0]); return *this; }
+	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Div(const std::array<T, 32 / sizeof(T)>& operand) { this->Div(&operand[0]); }
+	void Div(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); }
 
 
 	// Set
@@ -298,12 +298,25 @@ public:
 	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }	
 
 
-private:
-	void DefaultAdd(const T* operand, std::true_type) { this->Add(operand); }
-	void DefaultAdd(const T* operand, std::false_type) { this->AddSaturate(operand); }
+	// Clear
 
-	void DefaultSub(const T* operand, std::true_type) { this->Sub(operand); }
-	void DefaultSub(const T* operand, std::false_type) { this->SubSaturate(operand); }
+	void Clear() 
+	{ 
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_and_pd(_mm256_loadu_pd(Data), _mm256_setzero_pd()));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_and_ps(_mm256_loadu_ps(Data), _mm256_setzero_ps()));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_and_si256(_mm256_loadu_epi64(Data), _mm256_setzero_si256()));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_and_si256(_mm256_loadu_epi32(Data), _mm256_setzero_si256()));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_and_si256(_mm256_loadu_epi16(Data), _mm256_setzero_si256()));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_and_si256(_mm256_loadu_epi8(Data), _mm256_setzero_si256()));
+	}
+
+
+private:
+	void DefaultAdd(const T* operand, std::true_type) { Add(operand); }
+	void DefaultAdd(const T* operand, std::false_type) { AddSaturate(operand); }
+
+	void DefaultSub(const T* operand, std::true_type) { Sub(operand); }
+	void DefaultSub(const T* operand, std::false_type) { SubSaturate(operand); }
 };
 
 template<typename T>

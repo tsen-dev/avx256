@@ -438,6 +438,37 @@ void testAVX256Set()
 	for (int i = 0; i < 32; ++i) assert(myUChars[i] == i);
 }
 
+void testAVX256Clear()
+{
+	double myDoubles[4] = { 1, 2, 3, 4 };
+	float myFloats[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+	int64_t myLongs[4] = { 1, 2, 3, 4 };
+	int32_t myInts[8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+	int16_t myShorts[16] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+	int8_t myChars[32] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };
+
+	AVX256<double> avxDoubles{ myDoubles };
+	AVX256<float> avxFloats{ myFloats };
+	AVX256<int64_t> avxLongs{ myLongs };
+	AVX256<int32_t> avxInts{ myInts };
+	AVX256<int16_t> avxShorts{ myShorts };
+	AVX256<int8_t> avxChars{ myChars };
+
+	avxDoubles.Clear();
+	avxFloats.Clear();
+	avxLongs.Clear();
+	avxInts.Clear();
+	avxShorts.Clear();
+	avxChars.Clear();
+
+	assert(std::all_of(std::begin(myDoubles), std::end(myDoubles), [](double element) {return element == 0; }));
+	assert(std::all_of(std::begin(myFloats), std::end(myFloats), [](float element) {return element == 0; }));
+	assert(std::all_of(std::begin(myLongs), std::end(myLongs), [](int64_t element) {return element == 0; }));
+	assert(std::all_of(std::begin(myInts), std::end(myInts), [](int32_t element) {return element == 0; }));
+	assert(std::all_of(std::begin(myShorts), std::end(myShorts), [](int16_t element) {return element == 0; }));
+	assert(std::all_of(std::begin(myChars), std::end(myChars), [](int8_t element) {return element == 0; }));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -451,6 +482,7 @@ void runTests()
 	testAVX256Mul();
 	testAVX256Div();
 	testAVX256Set();
+	testAVX256Clear();
 }
 
 int main()
@@ -458,16 +490,6 @@ int main()
 	runTests();
 
 	std::cout << "All tests passed\n";
-
-	AVX256<int16_t> avxShorts{ new int16_t[16] };
-
-	std::cout << avxShorts << '\n';
-
-	avxShorts = {1, 2, 3, 4, 5, 6, 7};
-
-	std::cout << avxShorts << '\n';
-
-	delete[] avxShorts.Data;
 
 	return 0;
 }
