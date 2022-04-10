@@ -191,79 +191,40 @@ public:
 	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); return *this; }
 
 
+	// Set // 
 
-	// Set
+	void Set(const T value)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_set1_pd(value));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_set1_ps(value));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_set1_epi64x(value));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_set1_epi32(value));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_set1_epi16(value));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_set1_epi8(value));
+	}
 
-	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
-	void Set(const double value) { _mm256_storeu_pd(Data, _mm256_set1_pd(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
-	void Set(const double * values) { _mm256_storeu_pd(Data, _mm256_loadu_pd(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
-	void Set(const float value) { _mm256_storeu_ps(Data, _mm256_set1_ps(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
-	void Set(const float * values) { _mm256_storeu_ps(Data, _mm256_loadu_ps(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int64_t>>>
-	void Set(const int64_t value) { _mm256_storeu_epi64(Data, _mm256_set1_epi64x(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int64_t>>>
-	void Set(const int64_t* values) { _mm256_storeu_epi64(Data, _mm256_loadu_epi64(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint64_t>>>
-	void Set(const uint64_t value) { _mm256_storeu_epi64(Data, _mm256_set1_epi64x(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint64_t>>>
-	void Set(const uint64_t* values) { _mm256_storeu_epi64(Data, _mm256_loadu_epi64(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int32_t>>>
-	void Set(const int32_t value) { _mm256_storeu_epi32(Data, _mm256_set1_epi32(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int32_t>>>
-	void Set(const int32_t* values) { _mm256_storeu_epi32(Data, _mm256_loadu_epi32(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint32_t>>>
-	void Set(const uint32_t value) { _mm256_storeu_epi32(Data, _mm256_set1_epi32(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint32_t>>>
-	void Set(const uint32_t* values) { _mm256_storeu_epi32(Data, _mm256_loadu_epi32(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void Set(const int16_t value) { _mm256_storeu_epi16(Data, _mm256_set1_epi16(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void Set(const int16_t* values) { _mm256_storeu_epi16(Data, _mm256_loadu_epi16(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void Set(const uint16_t value) { _mm256_storeu_epi16(Data, _mm256_set1_epi16(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void Set(const uint16_t* values) { _mm256_storeu_epi16(Data, _mm256_loadu_epi16(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void Set(const int8_t value) { _mm256_storeu_epi8(Data, _mm256_set1_epi8(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void Set(const int8_t* values) { _mm256_storeu_epi8(Data, _mm256_loadu_epi8(values)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void Set(const uint8_t value) { _mm256_storeu_epi8(Data, _mm256_set1_epi8(value)); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void Set(const uint8_t* values) { _mm256_storeu_epi8(Data, _mm256_loadu_epi8(values)); }
-
-	AVX256& operator=(const T value) { Set(value); return *this; }
-	AVX256& operator=(const T* values) { Set(values); return *this; }
+	void Set(const T* values)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_loadu_pd(values));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_loadu_ps(values));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_loadu_epi64(values));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_loadu_epi32(values));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_loadu_epi16(values));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_loadu_epi8(values));
+	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); }
+
+	AVX256& operator=(const T value) { Set(value); return *this; }
+
+	AVX256& operator=(const T* values) { Set(values); return *this; }
+
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }	
 
 
-	// Clear
+	// Clear // 
 
 	void Clear() 
 	{ 
@@ -274,11 +235,6 @@ public:
 		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_setzero_si256());
 		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_setzero_si256());
 	}
-
-
-private:
-	void DefaultSub(const T* operand, std::true_type) { Sub(operand); }
-	void DefaultSub(const T* operand, std::false_type) { SubSaturate(operand); }
 };
 
 template<typename T>
