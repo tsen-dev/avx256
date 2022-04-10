@@ -491,6 +491,9 @@ int main()
 
 	std::cout << "All tests passed\n";
 
+	AVX256<int> x{ new int[8] };
+	x /= {1, 2, 3, 4, 5, 6, 7, 8};
+
 	return 0;
 }
 

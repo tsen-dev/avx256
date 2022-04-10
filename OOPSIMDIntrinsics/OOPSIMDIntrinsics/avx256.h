@@ -48,7 +48,7 @@ public:
 		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_adds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
 		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_adds_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
 		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
-		else if constexpr (true) static_assert(false, "AddSaturate() is only available for 16 or 8 bit addition");
+		else if constexpr (true) static_assert(false, "AVX256: AddSaturate() is only available for 16 or 8 bit addition");
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
@@ -90,7 +90,7 @@ public:
 		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_subs_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
 		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_subs_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
 		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_subs_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
-		else if constexpr (true) static_assert(false, "SubSaturate() is only available for 16 or 8 bit subtraction");
+		else if constexpr (true) static_assert(false, "AVX256: SubSaturate() is only available for 16 or 8 bit subtraction");
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
@@ -113,95 +113,83 @@ public:
 	
 	// Multiplication //
 
-	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
-	void Mul(const double* operand) { _mm256_storeu_pd(Data, _mm256_mul_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
-	void Mul(const float* operand) { _mm256_storeu_ps(Data, _mm256_mul_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
-	
-	// Multiply the unsigned low 32-bits of each 64-bit element
-	template<typename = std::enable_if_t<std::is_same_v<T, uint64_t>>>
-	void Mul(const uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_mul_epu32(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
-
-	// Multiply the signed low 32-bits of each 64-bit element
-	template<typename = std::enable_if_t<std::is_same_v<T, int64_t>>>
-	void Mul(const int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_mul_epi32(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
-
-	// Multiply unsigned 32-bit elements, save the low 32-bits of the result
-	template<typename = std::enable_if_t<std::is_same_v<T, uint32_t>>>
-	void Mul(const uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_mullo_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-
-	// Multiply signed 32-bit elements, save the low 32-bits of the result
-	template<typename = std::enable_if_t<std::is_same_v<T, int32_t>>>
-	void Mul(const int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_mullo_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-
-	// Multiply unsigned 16-bit elements, save the low 16-bits of the result
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void Mul(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_mullo_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	// Multiply signed 16-bit elements, save the low 16-bits of the result
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void Mul(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_mullo_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	// Multiply unsigned 8-bit elements, save the low 8-bits of the result (which is unsigned saturated before saving)
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void Mul(const uint8_t* operand) 
-	{ 
-		_mm256_storeu_epi8(
-			Data, 
-			_mm256_packus_epi16(
-				_mm256_mullo_epi16(
-					_mm256_unpacklo_epi8(_mm256_loadu_epi8(Data), _mm256_set1_epi8(0)), 
-					_mm256_unpacklo_epi8(_mm256_loadu_epi8(operand), _mm256_set1_epi8(0))
-				),
-				_mm256_mullo_epi16(
-					_mm256_unpackhi_epi8(_mm256_loadu_epi8(Data), _mm256_set1_epi8(0)),
-					_mm256_unpackhi_epi8(_mm256_loadu_epi8(operand), _mm256_set1_epi8(0))
+	/*
+	* 64-bit: The low 32-bits of each element are multiplied, the 64-bit result is saved
+	* 32-bit: 32-bits are multiplied, the low 32-bits of the result is saved
+	* 16-bit: 16-bits are multiplied, the low 16-bits of the result is saved
+	* 8-bit: 8-bits are multiplied, the low 8-bits of the result is saturated and saved
+	*/
+	void Mul(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_mul_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_mul_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_mul_epu32(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, int64_t>) _mm256_storeu_epi64(Data, _mm256_mul_epi32(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_mullo_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_mullo_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_mullo_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_mullo_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, uint8_t>)
+		{
+			_mm256_storeu_epi8(
+				Data,
+				_mm256_packus_epi16(
+					_mm256_mullo_epi16(
+						_mm256_unpacklo_epi8(_mm256_loadu_epi8(Data), _mm256_setzero_si256()),
+						_mm256_unpacklo_epi8(_mm256_loadu_epi8(operand), _mm256_setzero_si256())
+					),
+					_mm256_mullo_epi16(
+						_mm256_unpackhi_epi8(_mm256_loadu_epi8(Data), _mm256_setzero_si256()),
+						_mm256_unpackhi_epi8(_mm256_loadu_epi8(operand), _mm256_setzero_si256())
+					)
 				)
-			)
-		); 
+			);
+		}
+		else if constexpr (std::is_same_v<T, int8_t>)
+		{
+			_mm256_storeu_epi8(
+				Data,
+				_mm256_packs_epi16(
+					_mm256_mullo_epi16(									// Sign extension
+						_mm256_unpacklo_epi8(_mm256_loadu_epi8(Data), _mm256_cmpgt_epi8(_mm256_setzero_si256(), _mm256_loadu_epi8(Data))),
+						_mm256_unpacklo_epi8(_mm256_loadu_epi8(operand), _mm256_cmpgt_epi8(_mm256_setzero_si256(), _mm256_loadu_epi8(operand)))
+					),
+					_mm256_mullo_epi16(									// Sign extension
+						_mm256_unpackhi_epi8(_mm256_loadu_epi8(Data), _mm256_cmpgt_epi8(_mm256_setzero_si256(), _mm256_loadu_epi8(Data))),
+						_mm256_unpackhi_epi8(_mm256_loadu_epi8(operand), _mm256_cmpgt_epi8(_mm256_setzero_si256(), _mm256_loadu_epi8(operand)))
+					)
+				)
+			);
+		}
 	}
 
-	// Multiply signed 8-bit elements, save the low 8-bits of the result (which is signed saturated before saving)
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void Mul(const int8_t* operand) 
-	{ 
-		_mm256_storeu_epi8(
-			Data,
-			_mm256_packs_epi16(
-				_mm256_mullo_epi16(
-					_mm256_unpacklo_epi8(_mm256_loadu_epi8(Data), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(Data))),
-					_mm256_unpacklo_epi8(_mm256_loadu_epi8(operand), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(operand)))
-				),
-				_mm256_mullo_epi16(
-					_mm256_unpackhi_epi8(_mm256_loadu_epi8(Data), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(Data))),
-					_mm256_unpackhi_epi8(_mm256_loadu_epi8(operand), _mm256_cmpgt_epi8(_mm256_set1_epi8(0), _mm256_loadu_epi8(operand)))
-				)
-			)
-		);
-	}
-
-	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used.
-	AVX256& operator*=(const T* operand) { Mul(operand); return *this; }
-	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); return *this; }
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Mul(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); }
 
+	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used.
+	AVX256& operator*=(const T* operand) { Mul(operand); return *this; }
 
-	// Division
+	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); return *this; }
 
-	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
-	void Div(const double* operand) { _mm256_storeu_pd(Data, _mm256_div_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
 
-	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
-	void Div(const float* operand) { _mm256_storeu_ps(Data, _mm256_div_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
+	// Division //
 
-	AVX256& operator/=(const T* operand) { Div(operand); return *this; }
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); return *this; }
+	void Div(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_div_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_div_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (true) static_assert(false, "AVX256: Division is only available for double and float types");
+	}
+
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Div(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); }
+
+	AVX256& operator/=(const T* operand) { Div(operand); return *this; }
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); return *this; }
+
 
 
 	// Set
