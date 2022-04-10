@@ -27,114 +27,91 @@ public:
 	
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
-	// Addition
+	// Addition //
 
-	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
-	void Add(const double* operand) { _mm256_storeu_pd(Data, _mm256_add_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
+	void Add(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_add_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_add_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+	}
 
-	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
-	void Add(const float* operand) { _mm256_storeu_ps(Data, _mm256_add_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint64_t>>>
-	void Add(const uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int64_t>>>
-	void Add(const int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_add_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint32_t>>>
-	void Add(const uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int32_t>>>
-	void Add(const int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_add_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void Add(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void Add(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_add_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void AddSaturate(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void AddSaturate(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_adds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void Add(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void Add(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void AddSaturate(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void AddSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator+=(const T* operand) { DefaultAdd(operand, std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator+=(const std::array<T, 32 / sizeof(T)>& operand) { DefaultAdd(&operand[0], std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Add(const std::array<T, 32 / sizeof(T)>& operand) { Add(&operand[0]); }
+
+	void AddSaturate(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_adds_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_adds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_adds_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_adds_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		else if constexpr (true) static_assert(false, "AddSaturate() is only available for 16 or 8 bit addition");
+	}
+
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void AddSatuate(const std::array<T, 32 / sizeof(T)>& operand) { AddSatuate(&operand[0]); }
 
+	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise
+	AVX256& operator+=(const T* operand) 
+	{ 
+		if constexpr (sizeof(T) > 2) { Add(operand);  return *this; }
+		else if constexpr (sizeof(T) <= 2) { AddSatuate(operand);  return *this; }
+	}
 
-	// Subtraction
+	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator+=(const std::array<T, 32 / sizeof(T)>& operand)
+	{
+		if constexpr (sizeof(T) > 2) { Add(&operand[0]);  return *this; }
+		else if constexpr (sizeof(T) <= 2) { AddSatuate(&operand[0]);  return *this; }
+	}
 
-	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
-	void Sub(const double* operand) { _mm256_storeu_pd(Data, _mm256_sub_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
 
-	template<typename = std::enable_if_t<std::is_same_v<T, float>>>
-	void Sub(const float* operand) { _mm256_storeu_ps(Data, _mm256_sub_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand))); }
+	// Subtraction //
 
-	template<typename = std::enable_if_t<std::is_same_v<T, uint64_t>>>
-	void Sub(const uint64_t* operand) { _mm256_storeu_epi64(Data, _mm256_sub_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
+	void Sub(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_sub_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_sub_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_sub_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_sub_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_sub_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_sub_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+	}
 
-	template<typename = std::enable_if_t<std::is_same_v<T, int64_t>>>
-	void Sub(const int64_t* operand) { _mm256_storeu_epi64(Data, _mm256_sub_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint32_t>>>
-	void Sub(const uint32_t* operand) { _mm256_storeu_epi32(Data, _mm256_sub_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int32_t>>>
-	void Sub(const int32_t* operand) { _mm256_storeu_epi32(Data, _mm256_sub_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void Sub(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_sub_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void Sub(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_sub_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint16_t>>>
-	void SubSaturate(const uint16_t* operand) { _mm256_storeu_epi16(Data, _mm256_subs_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int16_t>>>
-	void SubSaturate(const int16_t* operand) { _mm256_storeu_epi16(Data, _mm256_subs_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void Sub(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_sub_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void Sub(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_sub_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
-	void SubSaturate(const uint8_t* operand) { _mm256_storeu_epi8(Data, _mm256_subs_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	template<typename = std::enable_if_t<std::is_same_v<T, int8_t>>>
-	void SubSaturate(const int8_t* operand) { _mm256_storeu_epi8(Data, _mm256_subs_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-
-	AVX256& operator-=(const T* operand) { DefaultSub(operand, std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator-=(const std::array<T, 32 / sizeof(T)>& operand) { DefaultSub(&operand[0], std::conditional_t<(sizeof(T) > 2), std::true_type, std::false_type>{}); return *this; }
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Sub(const std::array<T, 32 / sizeof(T)>& operand) { Sub(&operand[0]); }
+
+	void SubSaturate(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_subs_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_subs_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_subs_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_subs_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		else if constexpr (true) static_assert(false, "SubSaturate() is only available for 16 or 8 bit subtraction");
+	}
+
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void SubSatuate(const std::array<T, 32 / sizeof(T)>& operand) { SubSatuate(&operand[0]); }
 
+	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise
+	AVX256& operator-=(const T* operand)
+	{
+		if constexpr (sizeof(T) > 2) { Sub(operand);  return *this; }
+		else if constexpr (sizeof(T) <= 2) { SubSatuate(operand);  return *this; }
+	}
+
+	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator-=(const std::array<T, 32 / sizeof(T)>& operand)
+	{
+		if constexpr (sizeof(T) > 2) { Sub(&operand[0]);  return *this; }
+		else if constexpr (sizeof(T) <= 2) { SubSatuate(&operand[0]);  return *this; }
+	}
+
 	
-	// Multiplication
+	// Multiplication //
 
 	template<typename = std::enable_if_t<std::is_same_v<T, double>>>
 	void Mul(const double* operand) { _mm256_storeu_pd(Data, _mm256_mul_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand))); }
@@ -312,9 +289,6 @@ public:
 
 
 private:
-	void DefaultAdd(const T* operand, std::true_type) { Add(operand); }
-	void DefaultAdd(const T* operand, std::false_type) { AddSaturate(operand); }
-
 	void DefaultSub(const T* operand, std::true_type) { Sub(operand); }
 	void DefaultSub(const T* operand, std::false_type) { SubSaturate(operand); }
 };
