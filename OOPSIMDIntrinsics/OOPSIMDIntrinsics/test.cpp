@@ -28,39 +28,35 @@ void testHasAVX2Support()
 
 void testAVX256Constructor()
 {
-	float floats[] = { 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0 };
-	double doubles[] = { 1.0, 2.0, 3.0, 4.0 };
-	uint32_t uInts[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-	uint16_t uShorts[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-	uint8_t uChars[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 
-		18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32 };	
+	float floats[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+	double doubles[] = { 0, 1, 2, 3 };
+	uint32_t uInts[] = { 0, 1, 2, 3, 4, 5, 6, 7 };
+	uint16_t uShorts[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+	uint8_t uChars[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 };	
 
 	AVX256<float> avxFloats{ floats };
-	assert(std::equal(std::begin(floats), std::end(floats), avxFloats.Data) == true);
-
 	AVX256<double> avxDoubles{ doubles };
-	assert(std::equal(std::begin(doubles), std::end(doubles), avxDoubles.Data) == true);
-
 	AVX256<uint32_t> avxUInts{ uInts };
-	assert(std::equal(std::begin(uInts), std::end(uInts), avxUInts.Data) == true);
-
 	AVX256<uint16_t> avxUShorts{ uShorts };
-	assert(std::equal(std::begin(uShorts), std::end(uShorts), avxUShorts.Data) == true);
-
 	AVX256<uint8_t> avxUChars{ uChars };
+
+	assert(std::equal(std::begin(floats), std::end(floats), avxFloats.Data) == true);	
+	assert(std::equal(std::begin(doubles), std::end(doubles), avxDoubles.Data) == true);	
+	assert(std::equal(std::begin(uInts), std::end(uInts), avxUInts.Data) == true);	
+	assert(std::equal(std::begin(uShorts), std::end(uShorts), avxUShorts.Data) == true);	
 	assert(std::equal(std::begin(uChars), std::end(uChars), avxUChars.Data) == true);
 
-	/* Testing invalid constructions that should not compile:
-
-	void* voids;
-	AVX256<void> avxVoid{ voids }; // 'AVX256': class template cannot be constructed
-
-	class X {};
-	X* xs;
-	AVX256<X> avxX{ xs }; // 'AVX256': class template cannot be constructed
-
-	uint8_t* uCharPtrs[] = { &uChars[0], &uChars[1], &uChars[2], &uChars[3] };
-	AVX256<uint8_t*> avxUCharPtrs{ uCharPtrs }; // 'AVX256': class template cannot be constructed */
+	AVX256<float> avxFloats2{ { 0, 1, 2, 3, 4, 5, 6, 7 } };
+	AVX256<double> avxDoubles2{ { 0, 1, 2, 3 } };
+	AVX256<uint32_t> avxUInts2{ { 0, 1, 2, 3, 4, 5, 6, 7 } };
+	AVX256<uint16_t> avxUShorts2{ { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } };
+	AVX256<uint8_t> avxUChars2{ { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 } };
+	
+	for (int i = 0; i < 8; ++i) assert(avxFloats2.Data[i] == i);
+	for (int i = 0; i < 4; ++i) assert(avxDoubles2.Data[i] == i);
+	for (int i = 0; i < 8; ++i) assert(avxUInts2.Data[i] == i);
+	for (int i = 0; i < 16; ++i) assert(avxUShorts2.Data[i] == i);
+	for (int i = 0; i < 32; ++i) assert(avxUChars2.Data[i] == i);
 }
 
 void testAVX256SubscriptOperator()

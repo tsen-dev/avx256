@@ -14,20 +14,28 @@ namespace AVX256Utils
 template <typename T, typename = std::enable_if_t<std::is_fundamental_v<T> && !std::is_void_v<T>>>
 class AVX256
 {
-public:
+public:	
 	T* Data;
 
-	AVX256(T* data) : Data{ data } { }
+	AVX256(T* const data) : Data{ data }, OwnsData{ false } { }
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256(const std::array<T, 32 / sizeof(T)>& data) : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { std::copy(data.cbegin(), data.cend(), Data); }
 
 	T& operator[] (int index) const { return Data[index]; }	
 
 	operator T* () { return Data; }
 
+	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Next() { Data += (256 / 8) / sizeof(T); } 
 	
+	// Increments 'Data' to point to the previous 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
-	// Addition //
+	~AVX256() { if (OwnsData) delete[] Data; }
+
+
+	// Addition ////////////////////
 
 	void Add(const T* operand)
 	{
@@ -69,7 +77,7 @@ public:
 	}
 
 
-	// Subtraction //
+	// Subtraction ///////////////////
 
 	void Sub(const T* operand)
 	{
@@ -111,7 +119,7 @@ public:
 	}
 
 	
-	// Multiplication //
+	// Multiplication //////////////////
 
 	/*
 	* 64-bit: The low 32-bits of each element are multiplied, the 64-bit result is saved
@@ -173,7 +181,7 @@ public:
 	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); return *this; }
 
 
-	// Division //
+	// Division ///////////////////
 
 	void Div(const T* operand)
 	{
@@ -191,7 +199,7 @@ public:
 	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); return *this; }
 
 
-	// Set // 
+	// Set // //////////////////
 
 	void Set(const T value)
 	{
@@ -224,7 +232,7 @@ public:
 	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }	
 
 
-	// Clear // 
+	// Clear //////////////////
 
 	void Clear() 
 	{ 
@@ -235,6 +243,9 @@ public:
 		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_setzero_si256());
 		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_setzero_si256());
 	}
+
+	private:		
+		bool OwnsData; // Specifies whether the memory 'Data' points to was allocated at the constructor
 };
 
 template<typename T>
