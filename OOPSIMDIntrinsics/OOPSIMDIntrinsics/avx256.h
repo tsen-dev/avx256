@@ -289,10 +289,13 @@ public:
 	template<typename = std::enable_if_t<std::is_same_v<T, uint8_t>>>
 	void Set(const uint8_t* values) { _mm256_storeu_epi8(Data, _mm256_loadu_epi8(values)); }
 
-	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); }
 	AVX256& operator=(const T value) { Set(value); return *this; }
 	AVX256& operator=(const T* values) { Set(values); return *this; }
-	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); }
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }	
 
 
 private:

@@ -459,6 +459,16 @@ int main()
 
 	std::cout << "All tests passed\n";
 
+	AVX256<int16_t> avxShorts{ new int16_t[16] };
+
+	std::cout << avxShorts << '\n';
+
+	avxShorts = {1, 2, 3, 4, 5, 6, 7};
+
+	std::cout << avxShorts << '\n';
+
+	delete[] avxShorts.Data;
+
 	return 0;
 }
 
