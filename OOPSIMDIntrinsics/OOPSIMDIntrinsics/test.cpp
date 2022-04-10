@@ -2,10 +2,8 @@
 #include <cassert>
 #include <cstdint>
 #include <sstream>
-
-#include <initializer_list>
-
 #include <array>
+#include <algorithm>
 
 #include "test.h"
 #include "avx256.h"
@@ -392,6 +390,54 @@ void testAVX256Div()
 	assert(std::equal(std::begin(myFloats0), std::end(myFloats0), myFloatsResults));
 }
 
+void testAVX256Set()
+{
+	double myDoubles[4];
+	float myFloats[8];
+	int64_t myLongs[4];
+	uint32_t myUInts[8];
+	int16_t myShorts[16];
+	uint8_t myUChars[32];
+
+	const double FLOAT = 10.5;
+	const int8_t INT = 100;
+
+	AVX256<double> avxDoubles{ myDoubles };
+	AVX256<float> avxFloats{ myFloats };
+	AVX256<int64_t> avxLongs{ myLongs };
+	AVX256<uint32_t> avxUInts{ myUInts };
+	AVX256<int16_t> avxShorts{ myShorts };
+	AVX256<uint8_t> avxUChars{ myUChars };
+
+	avxDoubles.Set(FLOAT);
+	avxFloats.Set(FLOAT);
+	avxLongs.Set(INT);
+	avxUInts.Set(INT);
+	avxShorts.Set(INT);
+	avxUChars.Set(INT);
+
+	assert(std::all_of(std::begin(myDoubles), std::end(myDoubles), [&](double element) {return element == FLOAT; }));
+	assert(std::all_of(std::begin(myFloats), std::end(myFloats), [&](float element) {return element == FLOAT; }));
+	assert(std::all_of(std::begin(myLongs), std::end(myLongs), [&](int64_t element) {return element == INT; }));
+	assert(std::all_of(std::begin(myUInts), std::end(myUInts), [&](uint32_t element) {return element == INT; }));
+	assert(std::all_of(std::begin(myShorts), std::end(myShorts), [&](int16_t element) {return element == INT; }));
+	assert(std::all_of(std::begin(myUChars), std::end(myUChars), [&](uint8_t element) {return element == INT; }));
+
+	avxDoubles.Set({ 0, 1, 2, 3 });
+	avxFloats.Set({ 0, 1, 2, 3, 4, 5, 6, 7 });
+	avxLongs.Set({ 0, 1, 2, 3 });
+	avxUInts.Set({ 0, 1, 2, 3, 4, 5, 6, 7 });
+	avxShorts.Set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 });
+	avxUChars.Set({ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31 });
+
+	for (int i = 0; i < 4; ++i) assert(myDoubles[i] == i);
+	for (int i = 0; i < 8; ++i) assert(myFloats[i] == i);
+	for (int i = 0; i < 4; ++i) assert(myLongs[i] == i);
+	for (int i = 0; i < 8; ++i) assert(myUInts[i] == i);
+	for (int i = 0; i < 16; ++i) assert(myShorts[i] == i);
+	for (int i = 0; i < 32; ++i) assert(myUChars[i] == i);
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -404,6 +450,7 @@ void runTests()
 	testAVX256Sub();
 	testAVX256Mul();
 	testAVX256Div();
+	testAVX256Set();
 }
 
 int main()
