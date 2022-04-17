@@ -244,6 +244,17 @@ public:
 		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_setzero_si256());
 	}
 
+
+	// Average ///////////
+
+	// Fractional results are rounded up to the nearest integer
+	void Average(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, uint16_t>) { _mm256_storeu_epi16(Data, _mm256_avg_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+		else if constexpr (std::is_same_v<T, uint8_t>) { _mm256_storeu_epi8(Data, _mm256_avg_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for uint8_t and uint16_t types"); }
+	}
+
 	private:		
 		bool OwnsData; // Specifies whether the memory 'Data' points to was allocated at the constructor
 };
