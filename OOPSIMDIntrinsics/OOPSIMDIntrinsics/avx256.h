@@ -258,22 +258,25 @@ public:
 
 	// Sum
 
-	uint64_t Sum()
+	auto Sum()
 	{
 		if constexpr (std::is_same_v<T, uint8_t>)
+		{			
+			__m256i sums = _mm256_sad_epu8(_mm256_loadu_epi8(Data), _mm256_setzero_si256()); // sums = |0|0|0|s3|0|0|0|s2|0|0|0|s1|0|0|0|s0| (16-bit packing)
+			sums = _mm256_add_epi64(_mm256_permute4x64_epi64(sums, 0b00011011), sums); // sums = |0|0|0|s0|0|0|0|s1|0|0|0|s2|0|0|0|s3| + |0|0|0|s3|0|0|0|s2|0|0|0|s1|0|0|0|s0| = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| (32-bit packing)			
+			sums = _mm256_add_epi32(sums, _mm256_shuffle_epi32(sums, 0b01010110)); // sums = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| + |0|0|0|s0+s3|0|0|0|s2+s1| = |0|0|0|s1+s2+s0+s3|0|s2+s1|0|s3+s0+s2+s1|				
+			return sums.m256i_u32[0];
+		}
+
+		else if constexpr (std::is_same_v<T, int8_t>)
 		{
-			// sums = |0|0|0|s3|0|0|0|s2|0|0|0|s1|0|0|0|s0| (16-bit packing)
-			__m256i sums = _mm256_sad_epu8(_mm256_loadu_epi8(Data), _mm256_setzero_si256()); 
-
-			// sums = |0|0|0|s0|0|0|0|s1|0|0|0|s2|0|0|0|s3| + |0|0|0|s3|0|0|0|s2|0|0|0|s1|0|0|0|s0|
-			//      = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| (32-bit packing)
-			sums = _mm256_add_epi64(_mm256_permute4x64_epi64(sums, 0b00011011), sums); 
-
-			// sums = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| + |0|0|0|s0+s3|0|0|0|s2+s1|
-			//		= |0|0|0|s1+s2+s0+s3|0|s2+s1|0|s3+s0+s2+s1|
-			sums = _mm256_add_epi64(sums, _mm256_shuffle_epi32(sums, 0b01010110));				
-
-			return sums.m256i_u64[0];
+			__m256i sums = _mm256_sad_epu8( // sums = |0|0|0|s3+8*128|0|0|0|s2+8*128|0|0|0|s1+8*128|0|0|0|s0+8*128| (16-bit packing)
+				_mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_set1_epi8(static_cast<int8_t>(128))),
+				_mm256_setzero_si256()
+			);
+			sums = _mm256_add_epi64(_mm256_permute4x64_epi64(sums, 0b00011011), sums); // sums = |0|0|0|s0+8*128|0|0|0|s1+8*128|0|0|0|s2+8*128|0|0|0|s3+8*128| + |0|0|0|s3+8*128|0|0|0|s2+8*128|0|0|0|s1+8*128|0|0|0|s0+8*128| = |0|s0+s3+16*128|0|s1+s2+16*128|0|s2+s1+16*128|0|s3+s0+16*128| (32-bit packing)			
+			sums = _mm256_add_epi64(sums, _mm256_shuffle_epi32(sums, 0b01010110)); // sums = |0|s0+s3+16*128|0|s1+s2+16*128|0|s2+s1+16*128|0|s3+s0+16*128| + |0|0|0|s0+s3+16*128|0|0|0|s2+s1+16*128| = |0|0|0|s1+s2+s0+s3+32*128|0|s2+s1+16*128|0|s3+s0+s2+s1+32*128|				
+			return sums.m256i_i32[0] - (32 * 128);
 		}
 	}
 
