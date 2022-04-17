@@ -255,6 +255,28 @@ public:
 		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for uint8_t and uint16_t types"); }
 	}
 
+
+	// Sum
+
+	uint64_t Sum()
+	{
+		if constexpr (std::is_same_v<T, uint8_t>)
+		{
+			// sums = |0|0|0|s3|0|0|0|s2|0|0|0|s1|0|0|0|s0| (16-bit packing)
+			__m256i sums = _mm256_sad_epu8(_mm256_loadu_epi8(Data), _mm256_setzero_si256()); 
+
+			// sums = |0|0|0|s0|0|0|0|s1|0|0|0|s2|0|0|0|s3| + |0|0|0|s3|0|0|0|s2|0|0|0|s1|0|0|0|s0|
+			//      = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| (32-bit packing)
+			sums = _mm256_add_epi64(_mm256_permute4x64_epi64(sums, 0b00011011), sums); 
+
+			// sums = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| + |0|0|0|s0+s3|0|0|0|s2+s1|
+			//		= |0|0|0|s1+s2+s0+s3|0|s2+s1|0|s3+s0+s2+s1|
+			sums = _mm256_add_epi64(sums, _mm256_shuffle_epi32(sums, 0b01010110));				
+
+			return sums.m256i_u64[0];
+		}
+	}
+
 	private:		
 		bool OwnsData; // Specifies whether the memory 'Data' points to was allocated at the constructor
 };

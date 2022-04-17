@@ -4,6 +4,7 @@
 #include <sstream>
 #include <array>
 #include <algorithm>
+#include <numeric>
 
 #include "test.h"
 #include "avx256.h"
@@ -488,6 +489,12 @@ void testAVX256Average()
 	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
 }
 
+void testAVX256Sum()
+{
+	AVX256<uint8_t> avxUChars0{ {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32} };
+	assert(avxUChars0.Sum() == std::accumulate(avxUChars0.Data, avxUChars0.Data + 32, 0));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -503,6 +510,7 @@ void runTests()
 	testAVX256Set();
 	testAVX256Clear();
 	testAVX256Average();
+	testAVX256Sum();
 }
 
 int main()
