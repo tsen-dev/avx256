@@ -257,7 +257,31 @@ public:
 	}
 
 
-	// Sum
+	// And ///////////
+
+	void And(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_and_pd(_mm256_loadu_pd(Data), _mm256_setzero_pd()));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_and_ps(_mm256_loadu_ps(Data), _mm256_setzero_ps()));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_and_si256(_mm256_loadu_epi64(Data), _mm256_setzero_si256()));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_and_si256(_mm256_loadu_epi32(Data), _mm256_setzero_si256()));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_and_si256(_mm256_loadu_epi16(Data), _mm256_setzero_si256()));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_and_si256(_mm256_loadu_epi8(Data), _mm256_setzero_si256()));
+	}
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	void And(const std::array<T, 32 / sizeof(T)>& operand) { And(&operand[0]); }
+
+	AVX256& operator&=(const T* operand) { And(operand); return *this; }
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator&=(const std::array<T, 32 / sizeof(T)>& operand) { And(&operand[0]); return *this; }
+
+
+
+
+
+	// Sum ///////////
 
 	// Returns the sum of all packed elements. The result is returned in full precision except with 32-bit integers, whose sum is accumulated into 32-bits and hence can overflow. This function is not available for 64-bit integers.
 	auto Sum() 

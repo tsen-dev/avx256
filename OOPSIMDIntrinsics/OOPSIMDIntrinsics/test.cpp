@@ -521,6 +521,18 @@ void testAVX256Sum()
 	assert(avxDoubles0.Sum() == std::accumulate(avxDoubles0.Data, avxDoubles0.Data + 4, static_cast <double>(0)));
 }
 
+void testAVX256And()
+{
+	AVX256<uint64_t> avxULongs{ {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX} };
+	AVX256<double> avxDoubles{ {std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()} };
+
+	avxULongs.And({ 0, 0, 0, 0 });
+	avxDoubles.And({ 0, 0, 0, 0 });
+
+	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
+	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == 0; }));
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -537,6 +549,7 @@ void runTests()
 	testAVX256Clear();
 	testAVX256Average();
 	testAVX256Sum();
+	testAVX256And();
 }
 
 int main()
