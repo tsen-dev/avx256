@@ -466,27 +466,28 @@ void testAVX256Clear()
 	assert(std::all_of(std::begin(myChars), std::end(myChars), [](int8_t element) {return element == 0; }));
 }
 
-void testAVX256Average()
+void testAVX256Not()
 {
-	uint16_t myUShorts0[16] = { 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX };
-	uint16_t myUShorts1[16] = { 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200 };
-	uint16_t myUShortsResults[16] = { 0, 2, 11, 1+(UINT16_MAX+200)/2, 0, 2, 11, 1+(UINT16_MAX+200)/2, 0, 2, 11, 1+(UINT16_MAX+200)/2, 0, 2, 11, 1+(UINT16_MAX+200)/2 };
+	AVX256<uint64_t> avxULongs{ {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX} };
+	AVX256<double> avxDoubles{ {std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()} };
 
-	uint8_t myUChars0[32] = { 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 
-							  0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX };
-	uint8_t myUChars1[32] = { 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 
-							  0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200 };
-	uint8_t myUCharsResults[32] = { 0, 2, 11, 1+(UINT8_MAX + 200) / 2, 0, 2, 11, 1+(UINT8_MAX + 200) / 2, 0, 2, 11, 1+(UINT8_MAX + 200) / 2, 0, 2, 11, 1+(UINT8_MAX + 200) / 2,
-									0, 2, 11, 1+(UINT8_MAX + 200) / 2, 0, 2, 11, 1+(UINT8_MAX + 200) / 2, 0, 2, 11, 1+(UINT8_MAX + 200) / 2, 0, 2, 11, 1+(UINT8_MAX + 200) / 2 };
+	avxULongs.Not();
+	avxDoubles.Not();
 
-	AVX256<uint16_t> avxUShorts0{ myUShorts0 };
-	AVX256<uint8_t> avxUChars0{ myUChars0 };
+	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
+	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == std::numeric_limits<double>::min(); }));
+}
 
-	avxUShorts0.Average(myUShorts1);
-	avxUChars0.Average(myUChars1);
+void testAVX256And()
+{
+	AVX256<uint64_t> avxULongs{ {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX} };
+	AVX256<double> avxDoubles{ {std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()} };
 
-	assert(std::equal(std::begin(myUShorts0), std::end(myUShorts0), myUShortsResults));
-	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
+	avxULongs.And({ 0, 0, 0, 0 });
+	avxDoubles.And({ 0, 0, 0, 0 });
+
+	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
+	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == 0; }));
 }
 
 void testAVX256Sum()
@@ -521,16 +522,27 @@ void testAVX256Sum()
 	assert(avxDoubles0.Sum() == std::accumulate(avxDoubles0.Data, avxDoubles0.Data + 4, static_cast <double>(0)));
 }
 
-void testAVX256And()
+void testAVX256Average()
 {
-	AVX256<uint64_t> avxULongs{ {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX} };
-	AVX256<double> avxDoubles{ {std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()} };
+	uint16_t myUShorts0[16] = { 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX };
+	uint16_t myUShorts1[16] = { 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200 };
+	uint16_t myUShortsResults[16] = { 0, 2, 11, 1 + (UINT16_MAX + 200) / 2, 0, 2, 11, 1 + (UINT16_MAX + 200) / 2, 0, 2, 11, 1 + (UINT16_MAX + 200) / 2, 0, 2, 11, 1 + (UINT16_MAX + 200) / 2 };
 
-	avxULongs.And({ 0, 0, 0, 0 });
-	avxDoubles.And({ 0, 0, 0, 0 });
+	uint8_t myUChars0[32] = { 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX,
+							  0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX };
+	uint8_t myUChars1[32] = { 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200,
+							  0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200 };
+	uint8_t myUCharsResults[32] = { 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2,
+									0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2 };
 
-	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
-	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == 0; }));
+	AVX256<uint16_t> avxUShorts0{ myUShorts0 };
+	AVX256<uint8_t> avxUChars0{ myUChars0 };
+
+	avxUShorts0.Average(myUShorts1);
+	avxUChars0.Average(myUChars1);
+
+	assert(std::equal(std::begin(myUShorts0), std::end(myUShorts0), myUShortsResults));
+	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
 }
 
 void runTests()
@@ -546,10 +558,12 @@ void runTests()
 	testAVX256Mul();
 	testAVX256Div();
 	testAVX256Set();
-	testAVX256Clear();
-	testAVX256Average();
-	testAVX256Sum();
+	testAVX256Clear();	
+	testAVX256Not();
 	testAVX256And();
+	testAVX256Sum();
+	testAVX256Average();
+	
 }
 
 int main()

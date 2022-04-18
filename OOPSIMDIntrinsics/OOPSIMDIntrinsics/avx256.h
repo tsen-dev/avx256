@@ -246,15 +246,19 @@ public:
 	}
 
 
-	// Average ///////////
+	// Not ///////////
 
-	// Computes the mean of corresponding elements. Fractional results are rounded up to the nearest integer
-	void Average(const T* operand)
+	void Not()
 	{
-		if constexpr (std::is_same_v<T, uint16_t>) { _mm256_storeu_epi16(Data, _mm256_avg_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
-		else if constexpr (std::is_same_v<T, uint8_t>) { _mm256_storeu_epi8(Data, _mm256_avg_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for uint8_t and uint16_t types"); }
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_andnot_pd(_mm256_loadu_pd(Data), _mm256_set1_pd(1)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_andnot_ps(_mm256_loadu_ps(Data), _mm256_set1_ps(1)));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_andnot_si256(_mm256_loadu_epi64(Data), _mm256_set1_epi64x(1)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_andnot_si256(_mm256_loadu_epi32(Data), _mm256_set1_epi32(1)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_andnot_si256(_mm256_loadu_epi16(Data), _mm256_set1_epi16(1)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_andnot_si256(_mm256_loadu_epi8(Data), _mm256_set1_epi8(1)));
 	}
+
+	AVX256& operator~() { Not(); return *this; }
 
 
 	// And ///////////
@@ -276,9 +280,6 @@ public:
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator&=(const std::array<T, 32 / sizeof(T)>& operand) { And(&operand[0]); return *this; }
-
-
-
 
 
 	// Sum ///////////
@@ -407,6 +408,17 @@ public:
 					_mm256_setzero_pd()			
 			).m256d_f64[0];
 		}
+	}
+
+	
+	// Average ///////////
+
+	// Computes the mean of corresponding elements. Fractional results are rounded up to the nearest integer
+	void Average(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, uint16_t>) { _mm256_storeu_epi16(Data, _mm256_avg_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+		else if constexpr (std::is_same_v<T, uint8_t>) { _mm256_storeu_epi8(Data, _mm256_avg_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
+		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for uint8_t and uint16_t types"); }
 	}
 
 	private:		
