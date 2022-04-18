@@ -598,6 +598,15 @@ int main()
 
 	std::cout << "All tests passed\n";
 
+	AVX256<double> x{ {1, 2, 3, 4} };
+	AVX256<double> y{ {4, 3, 2, 1} };
+	AVX256<double> result = x + y;
+	std::cout << result;
+	int* z = new int;
+	*z = 10;
+	delete z;
+	std::cout << z;
+
 	return 0;
 }
 

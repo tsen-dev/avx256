@@ -17,10 +17,13 @@ class AVX256
 public:	
 	T* Data;
 
+	// Creates an AVX256 that points to a newly allocated 32-bytes
+	AVX256() : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { }
+
 	// Creates an AVX256 that points to the specified data
 	AVX256(T* const data) : Data{ data }, OwnsData{ false } { }
 
-	// Creates an AVX256 that points to a copy of the specified array. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	// Creates an AVX256 that points to a newly created copy of the specified array. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256(const std::array<T, 32 / sizeof(T)>& data) : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { std::copy(data.cbegin(), data.cend(), Data); }
 
 	T& operator[] (int index) const { return Data[index]; }	
@@ -75,6 +78,14 @@ public:
 	{
 		if constexpr (sizeof(T) > 2) { Add(&operand[0]);  return *this; }
 		else if constexpr (sizeof(T) <= 2) { AddSatuate(&operand[0]);  return *this; }
+	}
+
+	AVX256 operator+(const T* operand)
+	{
+		AVX256<T> x{};
+		x = Data;
+		x += operand;
+		return x;
 	}
 
 
@@ -202,6 +213,7 @@ public:
 
 	// Set // //////////////////
 
+	// Broadcast the specified value into all elements of the AVX256 
 	void Set(const T value)
 	{
 		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_set1_pd(value));
@@ -212,6 +224,7 @@ public:
 		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_set1_epi8(value));
 	}
 
+	// Copy the specified data into the data AVX256 points to
 	void Set(const T* values)
 	{
 		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_loadu_pd(values));
@@ -225,8 +238,10 @@ public:
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); }
 
+	// Broadcast the specified value into all elements of the AVX256 
 	AVX256& operator=(const T value) { Set(value); return *this; }
 
+	// Copy the specified data into the data AVX256 points to
 	AVX256& operator=(const T* values) { Set(values); return *this; }
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
