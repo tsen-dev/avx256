@@ -17,9 +17,10 @@ class AVX256
 public:	
 	T* Data;
 
+	// Creates an AVX256 that points to the specified data
 	AVX256(T* const data) : Data{ data }, OwnsData{ false } { }
 
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	// Creates an AVX256 that points to a copy of the specified array. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256(const std::array<T, 32 / sizeof(T)>& data) : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { std::copy(data.cbegin(), data.cend(), Data); }
 
 	T& operator[] (int index) const { return Data[index]; }	
@@ -247,7 +248,7 @@ public:
 
 	// Average ///////////
 
-	// Fractional results are rounded up to the nearest integer
+	// Computes the mean of corresponding elements. Fractional results are rounded up to the nearest integer
 	void Average(const T* operand)
 	{
 		if constexpr (std::is_same_v<T, uint16_t>) { _mm256_storeu_epi16(Data, _mm256_avg_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
@@ -258,7 +259,8 @@ public:
 
 	// Sum
 
-	auto Sum()
+	// Returns the sum of all packed elements
+	auto Sum() 
 	{
 		if constexpr (std::is_same_v<T, uint8_t>)
 		{			
@@ -267,7 +269,6 @@ public:
 			sums = _mm256_add_epi32(sums, _mm256_shuffle_epi32(sums, 0b01010110)); // sums = |0|s0+s3|0|s1+s2|0|s2+s1|0|s3+s0| + |0|0|0|s0+s3|0|0|0|s2+s1| = |0|0|0|s1+s2+s0+s3|0|s2+s1|0|s3+s0+s2+s1|				
 			return sums.m256i_u32[0];
 		}
-
 		else if constexpr (std::is_same_v<T, int8_t>)
 		{
 			__m256i sums = _mm256_sad_epu8( // sums = |0|0|0|s3+8*128|0|0|0|s2+8*128|0|0|0|s1+8*128|0|0|0|s0+8*128| (16-bit packing)
@@ -277,6 +278,10 @@ public:
 			sums = _mm256_add_epi64(_mm256_permute4x64_epi64(sums, 0b00011011), sums); // sums = |0|0|0|s0+8*128|0|0|0|s1+8*128|0|0|0|s2+8*128|0|0|0|s3+8*128| + |0|0|0|s3+8*128|0|0|0|s2+8*128|0|0|0|s1+8*128|0|0|0|s0+8*128| = |0|s0+s3+16*128|0|s1+s2+16*128|0|s2+s1+16*128|0|s3+s0+16*128| (32-bit packing)			
 			sums = _mm256_add_epi64(sums, _mm256_shuffle_epi32(sums, 0b01010110)); // sums = |0|s0+s3+16*128|0|s1+s2+16*128|0|s2+s1+16*128|0|s3+s0+16*128| + |0|0|0|s0+s3+16*128|0|0|0|s2+s1+16*128| = |0|0|0|s1+s2+s0+s3+32*128|0|s2+s1+16*128|0|s3+s0+s2+s1+32*128|				
 			return sums.m256i_i32[0] - (32 * 128);
+		}
+		else if constexpr (std::is_same_v<T, uint16_t>)
+		{
+			_mm256_hadds_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(Data))
 		}
 	}
 
