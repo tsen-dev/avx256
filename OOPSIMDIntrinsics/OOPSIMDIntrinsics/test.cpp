@@ -490,6 +490,30 @@ void testAVX256And()
 	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == 0; }));
 }
 
+void testAVX256Or()
+{
+	AVX256<uint64_t> avxULongs{ {0, 0, 0, 0} };
+	AVX256<double> avxDoubles{ {0, 0, 0, 0} };
+
+	avxULongs.Or({ UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX });
+	avxDoubles.Or({ std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max() });
+
+	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == UINT64_MAX; }));
+	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == std::numeric_limits<double>::max(); }));
+}
+
+void testAVX256Xor()
+{
+	AVX256<uint64_t> avxULongs{ {0, 0, 0, 0} };
+	AVX256<double> avxDoubles{ {0, 0, 0, 0} };
+
+	avxULongs.Xor(avxULongs);
+	avxDoubles.Xor(avxDoubles);
+
+	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
+	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == 0; }));
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -561,6 +585,8 @@ void runTests()
 	testAVX256Clear();	
 	testAVX256Not();
 	testAVX256And();
+	testAVX256Or();
+	testAVX256Xor();
 	testAVX256Sum();
 	testAVX256Average();
 	

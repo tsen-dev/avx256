@@ -265,12 +265,12 @@ public:
 
 	void And(const T* operand)
 	{
-		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_and_pd(_mm256_loadu_pd(Data), _mm256_setzero_pd()));
-		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_and_ps(_mm256_loadu_ps(Data), _mm256_setzero_ps()));
-		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_and_si256(_mm256_loadu_epi64(Data), _mm256_setzero_si256()));
-		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_and_si256(_mm256_loadu_epi32(Data), _mm256_setzero_si256()));
-		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_and_si256(_mm256_loadu_epi16(Data), _mm256_setzero_si256()));
-		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_and_si256(_mm256_loadu_epi8(Data), _mm256_setzero_si256()));
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_and_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_and_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_and_si256(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_and_si256(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_and_si256(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_and_si256(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
@@ -280,6 +280,49 @@ public:
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator&=(const std::array<T, 32 / sizeof(T)>& operand) { And(&operand[0]); return *this; }
+
+
+	// Or ///////////
+
+	void Or(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_or_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_or_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_or_si256(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_or_si256(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_or_si256(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_or_si256(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+	}
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	void Or(const std::array<T, 32 / sizeof(T)>& operand) { Or(&operand[0]); }
+
+	AVX256& operator|=(const T* operand) { Or(operand); return *this; }
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator|=(const std::array<T, 32 / sizeof(T)>& operand) { Or(&operand[0]); return *this; }
+
+
+	// Xor ///////////
+
+	void Xor(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_xor_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_xor_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_xor_si256(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(operand)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_xor_si256(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_xor_si256(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_xor_si256(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+	}
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	void Xor(const std::array<T, 32 / sizeof(T)>& operand) { Xor(&operand[0]); }
+
+	AVX256& operator^=(const T* operand) { Xor(operand); return *this; }
+
+	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator^=(const std::array<T, 32 / sizeof(T)>& operand) { Xor(&operand[0]); return *this; }
+
 
 
 	// Sum ///////////
