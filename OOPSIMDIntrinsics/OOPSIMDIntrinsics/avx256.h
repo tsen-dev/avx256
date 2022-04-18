@@ -123,8 +123,8 @@ public:
 	// Multiplication //////////////////
 
 	/*
-	* 64-bit: The low 32-bits of each element are multiplied, the 64-bit result is saved
-	* 32-bit: 32-bits are multiplied, the low 32-bits of the result is saved
+	* 64-bit (integer): The low 32-bits of each element are multiplied, the 64-bit result is saved
+	* 32-bit (integer): 32-bits are multiplied, the low 32-bits of the result is saved
 	* 16-bit: 16-bits are multiplied, the low 16-bits of the result is saved
 	* 8-bit: 8-bits are multiplied, the low 8-bits of the result is saturated and saved
 	*/
@@ -259,7 +259,7 @@ public:
 
 	// Sum
 
-	// Returns the sum of all packed elements
+	// Returns the sum of all packed elements. The result is returned in full precision except with 32-bit integers, whose sum is accumulated into 32-bits and hence can overflow. This function is not available for 64-bit integers.
 	auto Sum() 
 	{
 		if constexpr (std::is_same_v<T, uint8_t>)
@@ -323,10 +323,10 @@ public:
 		}	
 		else if constexpr (std::is_same_v<T, uint32_t>)
 		{
-			return _mm256_hadd_epi32(
-				_mm256_hadd_epi32(
-					_mm256_permute4x64_epi64(
-						_mm256_hadd_epi32(
+			return _mm256_hadd_epi32( // = |0|0|0|0|0|0|0|s3+s2+s1+s0|
+				_mm256_hadd_epi32( // = |0|0|0|0|0|0|s3+s2|s1+s0|
+					_mm256_permute4x64_epi64( // = |0|0|0|0|s3|s2|s1|s0|
+						_mm256_hadd_epi32( // = |0|0|s3|s2|0|0|s1|s0| (32-bit packing)
 							_mm256_loadu_epi16(Data),
 							_mm256_setzero_si256()
 						),
@@ -339,10 +339,10 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, int32_t>)
 		{
-			return _mm256_hadd_epi32(
-				_mm256_hadd_epi32(
-					_mm256_permute4x64_epi64(
-						_mm256_hadd_epi32(
+			return _mm256_hadd_epi32( // = |0|0|0|0|0|0|0|s3+s2+s1+s0|
+				_mm256_hadd_epi32( // = |0|0|0|0|0|0|s3+s2|s1+s0|
+					_mm256_permute4x64_epi64( // = |0|0|0|0|s3|s2|s1|s0|
+						_mm256_hadd_epi32( // = |0|0|s3|s2|0|0|s1|s0| (32-bit packing)
 							_mm256_loadu_epi16(Data),
 							_mm256_setzero_si256()
 						),
@@ -353,7 +353,36 @@ public:
 				_mm256_setzero_si256()
 			).m256i_i32[0];
 		}
-
+		else if constexpr (std::is_same_v<T, uint64_t> || std::is_same_v<T, int64_t>) { static_assert(false, "AVX256: Sum() is not available for 64-bit integers"); }
+		else if constexpr (std::is_same_v<T, float>)
+		{
+			return _mm256_hadd_ps( // = |0|0|0|0|0|0|0|s3+s2+s1+s0|
+				_mm256_hadd_ps( // = |0|0|0|0|0|0|s3+s2|s1+s0|					
+					_mm256_castpd_ps(_mm256_permute4x64_pd( // = |0|0|0|0|s3|s2|s1|s0|
+						_mm256_castps_pd(_mm256_hadd_ps( // = |0|0|s3|s2|0|0|s1|s0| (32-bit packing)
+							_mm256_loadu_ps(Data),
+							_mm256_setzero_ps()							
+						)),
+						0b01011000
+					)),
+					_mm256_setzero_ps()
+				),
+				_mm256_setzero_ps()
+			).m256_f32[0];
+		}
+		else if constexpr (std::is_same_v<T, double>)
+		{
+		return _mm256_hadd_pd( // = |0|0|0|s1+s0|
+					_mm256_permute4x64_pd( // = |0|0|s1|s0|
+						_mm256_hadd_pd( // = |0|s1|0|s0| (64-bit packing)
+							_mm256_loadu_pd(Data),
+							_mm256_setzero_pd()
+						),
+						0b01011000
+					),
+					_mm256_setzero_pd()			
+			).m256d_f64[0];
+		}
 	}
 
 	private:		

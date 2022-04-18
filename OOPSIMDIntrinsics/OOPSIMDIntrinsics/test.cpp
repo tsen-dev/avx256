@@ -508,12 +508,17 @@ void testAVX256Sum()
 	AVX256<uint32_t> avxUInts0{ { UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX } };
 	AVX256<int32_t> avxInts0{ { INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN } };
 
+	AVX256<float> avxFloats0{ { 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5 } };
+	AVX256<double> avxDoubles0{ { 1.5, 2.5, 3.5, 4.5 } };
+
 	assert(avxUChars0.Sum() == std::accumulate(avxUChars0.Data, avxUChars0.Data + 32, static_cast<uint32_t>(0)));
 	assert(avxChars0.Sum() == std::accumulate(avxChars0.Data, avxChars0.Data + 32, static_cast<int32_t>(0)));
 	assert(avxUShorts0.Sum() == std::accumulate(avxUShorts0.Data, avxUShorts0.Data + 16, static_cast <uint32_t>(0)));
 	assert(avxShorts0.Sum() == std::accumulate(avxShorts0.Data, avxShorts0.Data + 16, static_cast <int32_t>(0)));
 	assert(avxUInts0.Sum() == std::accumulate(avxUInts0.Data, avxUInts0.Data + 8, static_cast <uint32_t>(0)));
 	assert(avxInts0.Sum() == std::accumulate(avxInts0.Data, avxInts0.Data + 8, static_cast <int32_t>(0)));
+	assert(avxFloats0.Sum() == std::accumulate(avxFloats0.Data, avxFloats0.Data + 8, static_cast <float>(0)));
+	assert(avxDoubles0.Sum() == std::accumulate(avxDoubles0.Data, avxDoubles0.Data + 4, static_cast <double>(0)));
 }
 
 void runTests()
