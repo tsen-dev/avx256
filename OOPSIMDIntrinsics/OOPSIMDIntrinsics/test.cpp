@@ -505,10 +505,15 @@ void testAVX256Sum()
 	AVX256<int16_t> avxShorts0{ { INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN,
 								  INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN, INT16_MIN } };
 
-	assert(avxUChars0.Sum() == std::accumulate(avxUChars0.Data, avxUChars0.Data + 32, 0));
-	assert(avxChars0.Sum() == std::accumulate(avxChars0.Data, avxChars0.Data + 32, 0));
-	assert(avxUShorts0.Sum() == std::accumulate(avxUShorts0.Data, avxUShorts0.Data + 16, 0));
-	assert(avxShorts0.Sum() == std::accumulate(avxShorts0.Data, avxShorts0.Data + 16, 0));
+	AVX256<uint32_t> avxUInts0{ { UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX } };
+	AVX256<int32_t> avxInts0{ { INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN } };
+
+	assert(avxUChars0.Sum() == std::accumulate(avxUChars0.Data, avxUChars0.Data + 32, static_cast<uint32_t>(0)));
+	assert(avxChars0.Sum() == std::accumulate(avxChars0.Data, avxChars0.Data + 32, static_cast<int32_t>(0)));
+	assert(avxUShorts0.Sum() == std::accumulate(avxUShorts0.Data, avxUShorts0.Data + 16, static_cast <uint32_t>(0)));
+	assert(avxShorts0.Sum() == std::accumulate(avxShorts0.Data, avxShorts0.Data + 16, static_cast <int32_t>(0)));
+	assert(avxUInts0.Sum() == std::accumulate(avxUInts0.Data, avxUInts0.Data + 8, static_cast <uint32_t>(0)));
+	assert(avxInts0.Sum() == std::accumulate(avxInts0.Data, avxInts0.Data + 8, static_cast <int32_t>(0)));
 }
 
 void runTests()

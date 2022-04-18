@@ -279,6 +279,31 @@ public:
 			sums = _mm256_add_epi64(sums, _mm256_shuffle_epi32(sums, 0b01010110)); // sums = |0|s0+s3+16*128|0|s1+s2+16*128|0|s2+s1+16*128|0|s3+s0+16*128| + |0|0|0|s0+s3+16*128|0|0|0|s2+s1+16*128| = |0|0|0|s1+s2+s0+s3+32*128|0|s2+s1+16*128|0|s3+s0+s2+s1+32*128|				
 			return sums.m256i_i32[0] - (32 * 128);
 		}
+		else if constexpr (std::is_same_v<T, uint16_t>)
+		{
+			return _mm256_hadd_epi32( // = |0|0|0|0|0|0|0|s7+s6+s5+s4+s3+s2+s1+s0|
+				_mm256_hadd_epi32( // = |0|0|0|0|0|0|s7+s6+s5+s4|s3+s2+s1+s0| 
+					_mm256_permute4x64_epi64( // = |0|0|0|0|s7+s6|s5+s4|s3+s2|s1+s0| 
+						_mm256_hadd_epi32( // = |0|0|s7+s6|s5+s4|0|0|s3+s2|s1+s0| 
+							_mm256_hadd_epi32( // = |s7|s6|s5|s4|s3|s2|s1|s0| (32-bit packing)
+								_mm256_unpacklo_epi16(
+									_mm256_loadu_epi16(Data),
+									_mm256_setzero_si256()
+								),
+								_mm256_unpackhi_epi16(
+									_mm256_loadu_epi16(Data),
+									_mm256_setzero_si256()
+								)
+							),
+							_mm256_setzero_si256()
+						),
+						0b01011000
+					),
+					_mm256_setzero_si256()
+				),
+				_mm256_setzero_si256()
+			).m256i_u32[0];
+		}
 		else if constexpr (std::is_same_v<T, int16_t>)
 		{
 			return _mm256_hadd_epi32( // = |0|0|0|0|0|0|0|s7+s6+s5+s4+s3+s2+s1+s0|
@@ -295,17 +320,32 @@ public:
 				), 
 				_mm256_setzero_si256()
 			).m256i_i32[0];
-		}
-		else if constexpr (std::is_same_v<T, uint16_t>)
+		}	
+		else if constexpr (std::is_same_v<T, uint32_t>)
 		{
-			return _mm256_hadd_epi32( // = |0|0|0|0|0|0|0|s7+s6+s5+s4+s3+s2+s1+s0|
-				_mm256_hadd_epi32( // = |0|0|0|0|0|0|s7+s6+s5+s4|s3+s2+s1+s0|
-					_mm256_permute4x64_epi64( // = |0|0|0|0|s7+s6|s5+s4|s3+s2|s1+s0|
-						_mm256_hadd_epi32( // = |0|0|s7+s6|s5+s4|0|0|s3+s2|s1+s0|
-							_mm256_madd_epi16( // = |s7|s6|s5|s4|s3|s2|s1|s0| (32-bit packing)
-								_mm256_loadu_epi16(Data),
-								_mm256_set1_epi16(1)),
-							_mm256_setzero_si256()),
+			return _mm256_hadd_epi32(
+				_mm256_hadd_epi32(
+					_mm256_permute4x64_epi64(
+						_mm256_hadd_epi32(
+							_mm256_loadu_epi16(Data),
+							_mm256_setzero_si256()
+						),
+						0b01011000
+					),
+					_mm256_setzero_si256()
+				),
+				_mm256_setzero_si256()
+			).m256i_u32[0];
+		}
+		else if constexpr (std::is_same_v<T, int32_t>)
+		{
+			return _mm256_hadd_epi32(
+				_mm256_hadd_epi32(
+					_mm256_permute4x64_epi64(
+						_mm256_hadd_epi32(
+							_mm256_loadu_epi16(Data),
+							_mm256_setzero_si256()
+						),
 						0b01011000
 					),
 					_mm256_setzero_si256()
@@ -313,6 +353,7 @@ public:
 				_mm256_setzero_si256()
 			).m256i_i32[0];
 		}
+
 	}
 
 	private:		
