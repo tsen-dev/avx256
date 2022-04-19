@@ -33,8 +33,6 @@ public:
 
 	operator T* () { return Data; }
 
-	operator bool() { return IsZero(); }
-
 	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Next() { Data += (256 / 8) / sizeof(T); } 
 	
@@ -431,6 +429,7 @@ public:
 
 	// IsZero ///////////
 
+	// Returns true if all elements are 0, false otherwise
 	bool IsZero() 
 	{ 
 		if constexpr (std::is_same_v<T, double>) switch (_mm256_testz_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(Data))) { case 0: return false; case 1: return true; }
