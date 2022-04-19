@@ -24,10 +24,7 @@ public:
 	AVX256(T* const data) : Data{ data }, OwnsData{ false } { }
 
 	// Creates an AVX256 that points to a newly created copy of the specified array. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256(const std::array<T, 32 / sizeof(T)>& data) : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { std::copy(data.cbegin(), data.cend(), Data); }
-
-	// Moves the data of the specifed AVX256 into a new AVX256
-	AVX256(AVX256&& avx) noexcept : Data{ avx.Data }, OwnsData{ true }  { avx.Data = nullptr; }
+	AVX256(const std::array<T, 32 / sizeof(T)>& data) : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { this->Set(data); }
 
 	T& operator[] (int index) const { return Data[index]; }	
 
@@ -83,13 +80,17 @@ public:
 		else if constexpr (sizeof(T) <= 2) { AddSatuate(&operand[0]);  return *this; }
 	}
 
-	AVX256 operator+(const T* operand)
+	std::array<T, 32 / sizeof(T)> operator+(const T* operand)
 	{
-		T* data = new T[32 / sizeof(T)];
-		std::copy(Data, Data + 32 / sizeof(T), data);
-		AVX256<T> x{data};
-		x += operand;
-		return x; 
+		std::array<T, 32 / sizeof(T)> result{};
+		T* dataOld = Data;
+		Data = &result[0];
+		
+		this->Set(dataOld);
+		*this += operand;
+
+		Data = dataOld;
+		return result; 
 	}
 
 
@@ -239,7 +240,7 @@ public:
 		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_loadu_epi8(values));
 	}
 
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	// Copy the specified data into the data AVX256 points to. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); }
 
 	// Broadcast the specified value into all elements of the AVX256 
@@ -248,7 +249,7 @@ public:
 	// Copy the specified data into the data AVX256 points to
 	AVX256& operator=(const T* values) { Set(values); return *this; }
 
-	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	// Copy the specified data into the data AVX256 points to. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }	
 
 
@@ -573,12 +574,50 @@ public:
 	
 	// Average ///////////
 
-	// Computes the mean of corresponding elements. Fractional results are rounded up to the nearest integer
+	// Computes the mean of corresponding elements, fractional results are rounded up to the nearest integer. This function is only available for 16 and 8-bit integers
 	void Average(const T* operand)
 	{
 		if constexpr (std::is_same_v<T, uint16_t>) { _mm256_storeu_epi16(Data, _mm256_avg_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand))); }
+		else if constexpr (std::is_same_v<T, int16_t>)
+		{
+			_mm256_storeu_epi16(
+				Data,
+				_mm256_add_epi16(
+					_mm256_avg_epu16(
+						_mm256_add_epi16(
+							_mm256_loadu_epi16(Data), 
+							_mm256_set1_epi16(static_cast<int16_t>(32768))
+						),
+						_mm256_add_epi16(
+							_mm256_loadu_epi16(operand),
+							_mm256_set1_epi16(static_cast<int16_t>(32768))
+						)
+					),
+					_mm256_set1_epi16(static_cast<int16_t>(-32768))
+				)
+			);
+		}
 		else if constexpr (std::is_same_v<T, uint8_t>) { _mm256_storeu_epi8(Data, _mm256_avg_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand))); }
-		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for uint8_t and uint16_t types"); }
+		else if constexpr (std::is_same_v<T, int8_t>) 
+		{ 
+			_mm256_storeu_epi8(
+				Data, 
+				_mm256_add_epi8(
+					_mm256_avg_epu8(
+						_mm256_add_epi8(
+							_mm256_loadu_epi8(Data), 
+							_mm256_set1_epi8(static_cast<int8_t>(128))
+						), 
+						_mm256_add_epi8(
+							_mm256_loadu_epi8(operand), 
+							_mm256_set1_epi8(static_cast<int8_t>(128))
+						)
+					), 
+					_mm256_set1_epi8(static_cast<int8_t>(-128))
+				)
+			); 
+		}
+		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for 16 and 8-bit integers"); }
 	}
 
 	private:		

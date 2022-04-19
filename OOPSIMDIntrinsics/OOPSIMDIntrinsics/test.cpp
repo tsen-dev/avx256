@@ -612,24 +612,42 @@ void testAVX256Sum()
 void testAVX256Average()
 {
 	uint16_t myUShorts0[16] = { 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX, 0, 0, 11, UINT16_MAX };
-	uint16_t myUShorts1[16] = { 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200 };
-	uint16_t myUShortsResults[16] = { 0, 2, 11, 1 + (UINT16_MAX + 200) / 2, 0, 2, 11, 1 + (UINT16_MAX + 200) / 2, 0, 2, 11, 1 + (UINT16_MAX + 200) / 2, 0, 2, 11, 1 + (UINT16_MAX + 200) / 2 };
+	uint16_t myUShorts1[16] = { 0, 4, 10, UINT16_MAX, 0, 4, 10, UINT16_MAX, 0, 4, 10, UINT16_MAX, 0, 4, 10, UINT16_MAX };
+	uint16_t myUShortsResults[16] = { 0, 2, 11, UINT16_MAX, 0, 2, 11, UINT16_MAX, 0, 2, 11, UINT16_MAX, 0, 2, 11, UINT16_MAX };
+
+	int16_t myShorts0[16] = { 0, 0, 11, INT16_MAX, 0, 0, 11, -INT16_MAX, 0, 0, 11, INT16_MAX, 0, 0, 11, INT16_MAX };
+	int16_t myShorts1[16] = { 0, 4, 10, -INT16_MAX, 0, 4, 10, -INT16_MAX, 0, 4, 10, INT16_MAX, 0, 4, 10, INT16_MAX };
+	int16_t myShortsResults[16] = { 0, 2, 11, 0, 0, 2, 11, -INT16_MAX, 0, 2, 11, INT16_MAX, 0, 2, 11, INT16_MAX };
 
 	uint8_t myUChars0[32] = { 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX,
 							  0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX };
-	uint8_t myUChars1[32] = { 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200,
-							  0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200, 0, 4, 10, 200 };
-	uint8_t myUCharsResults[32] = { 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2,
-									0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2, 0, 2, 11, 1 + (UINT8_MAX + 200) / 2 };
+	uint8_t myUChars1[32] = { 0, 4, 10, UINT8_MAX, 0, 4, 10, UINT8_MAX, 0, 4, 10, UINT8_MAX, 0, 4, 10, UINT8_MAX,
+							  0, 4, 10, UINT8_MAX, 0, 4, 10, UINT8_MAX, 0, 4, 10, UINT8_MAX, 0, 4, 10, UINT8_MAX };
+	uint8_t myUCharsResults[32] = { 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX,
+									0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX };
 
-	AVX256<uint16_t> avxUShorts0{ myUShorts0 };
-	AVX256<uint8_t> avxUChars0{ myUChars0 };
+	int8_t myChars0[32] = { 0, 0, 11, INT8_MAX, 0, 0, 11, -INT8_MAX, 0, 0, 11, INT8_MAX, 0, 0, 11, INT8_MAX,
+						    0, 0, 11, -INT8_MAX, 0, 0, 11, -INT8_MAX, 0, 0, 11, INT8_MAX, 0, 0, 11, INT8_MAX };
+	int8_t myChars1[32] = { 0, 4, 10, -INT8_MAX, 0, 4, 10, -INT8_MAX, 0, 4, 10, INT8_MAX, 0, 4, 10, INT8_MAX,
+							0, 4, 10, -INT8_MAX, 0, 4, 10, -INT8_MAX, 0, 4, 10, INT8_MAX, 0, 4, 10, INT8_MAX };
+	int8_t myCharsResults[32] = { 0, 2, 11, 0, 0, 2, 11, -INT8_MAX, 0, 2, 11, INT8_MAX, 0, 2, 11, INT8_MAX,
+								  0, 2, 11, -INT8_MAX, 0, 2, 11, -INT8_MAX, 0, 2, 11, INT8_MAX, 0, 2, 11, INT8_MAX };
 
-	avxUShorts0.Average(myUShorts1);
-	avxUChars0.Average(myUChars1);
+	AVX256<uint16_t> avxUShorts{ myUShorts0 };
+	AVX256<int16_t> avxShorts{ myShorts0 };
+	AVX256<uint8_t> avxUChars{ myUChars0 };
+	AVX256<int8_t> avxChars{ myChars0 };
+	
+
+	avxUShorts.Average(myUShorts1);
+	avxShorts.Average(myShorts1);
+	avxUChars.Average(myUChars1);
+	avxChars.Average(myChars1);
 
 	assert(std::equal(std::begin(myUShorts0), std::end(myUShorts0), myUShortsResults));
+	assert(std::equal(std::begin(myShorts0), std::end(myShorts0), myShortsResults));
 	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
+	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
 }
 
 void runTests()
@@ -666,7 +684,7 @@ int main()
 
 	AVX256<double> x{ {1, 2, 3, 4} };
 	AVX256<double> y{ {4, 3, 2, 1} };
-	AVX256<double> z = (x + y);
+	AVX256<double> z = x + y;
 	std::cout << z;
 
 	return 0;
