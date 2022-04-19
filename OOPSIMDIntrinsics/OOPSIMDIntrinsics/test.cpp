@@ -595,6 +595,24 @@ void testAVX256IsEqual()
 	assert((~avxUIntMask01).IsZero() && (~avxUIntMask10).IsZero() && avxUIntMask02.IsZero() && avxUIntMask20.IsZero());
 }
 
+void testAVX256IsGreater()
+{
+	AVX256<double> avxDoubles0{ {1, 2, 3, 4} }, avxDoubles1{ {0, 1, 2, 3} }, avxDoubles2{ {1, 2, 4, 5} };
+	AVX256<float> avxFloats0{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxFloats1{ {0, 1, 2, 3, 4, 5, 6, 7} }, avxFloats2{ {1, 2, 3, 4, 6, 7, 8, 9} };
+	AVX256<uint64_t> avxULongs0{ {UINT64_MAX, 2, 3, 4} }, avxULongs1{ {0, 1, 2, 3} }, avxULongs2{ {UINT64_MAX, 2, 4, 5} };
+	AVX256<int64_t> avxLongs0{ {-1, -2, 3, 4} }, avxLongs1{ {-2, -3, -1, 2} }, avxLongs2{ {-1, -2, 4, 5} };
+
+	AVX256<double> avxDoubleMask01 = avxDoubles0.IsGreater(avxDoubles1), avxDoubleMask10 = avxDoubles1.IsGreater(avxDoubles0), avxDoubleMask02 = avxDoubles0.IsGreater(avxDoubles2);
+	AVX256<float> avxFloatMask01 = avxFloats0.IsGreater(avxFloats1), avxFloatMask10 = avxFloats1.IsGreater(avxFloats0), avxFloatMask02 = avxFloats0.IsGreater(avxFloats2);
+	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsGreater(avxULongs1), avxULongMask10 = avxULongs1.IsGreater(avxULongs0), avxULongMask02 = avxULongs0.IsGreater(avxULongs2);
+	AVX256<int64_t> avxLongMask01 = avxLongs0.IsGreater(avxLongs1), avxLongMask10 = avxLongs1.IsGreater(avxLongs0), avxLongMask02 = avxLongs0.IsGreater(avxLongs2);
+
+	assert((~avxDoubleMask01).IsZero() && avxDoubleMask10.IsZero() && avxDoubleMask02.IsZero());
+	assert((~avxFloatMask01).IsZero() && avxFloatMask10.IsZero() && avxFloatMask02.IsZero());
+	assert((~avxULongMask01).IsZero() && avxULongMask10.IsZero() && avxULongMask02.IsZero());
+	assert((~avxLongMask01).IsZero() && avxLongMask10.IsZero() && avxLongMask02.IsZero());
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -690,6 +708,7 @@ void runTests()
 	testAVX256ShiftRight();
 	testAVX256IsZero();
 	testAVX256IsEqual();
+	testAVX256IsGreater();
 	testAVX256Sum();
 	testAVX256Average();
 	

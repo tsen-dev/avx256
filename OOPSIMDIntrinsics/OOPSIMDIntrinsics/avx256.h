@@ -534,6 +534,42 @@ public:
 	std::array<T, 32 / sizeof(T)> operator==(const AVX256& values) { return IsEqual(values.Data); }
 
 
+	// IsGreater /////////
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> IsGreater(const T* values)
+	{
+		std::array<T, 32 / sizeof(T)> mask{};
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(mask.data(), _mm256_cmp_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(values), _CMP_GT_OQ));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(mask.data(), _mm256_cmp_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(values), _CMP_GT_OQ));
+		else if constexpr (std::is_same_v<T, int64_t>) _mm256_storeu_epi64(mask.data(), _mm256_cmpgt_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(values)));
+		else if constexpr (std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(mask.data(), _mm256_cmpgt_epi64(_mm256_xor_si256(_mm256_loadu_epi64(Data), _mm256_set1_epi64x(static_cast<uint64_t>(0x8000000000000000))), _mm256_xor_si256(_mm256_loadu_epi64(values), _mm256_set1_epi64x(static_cast<uint64_t>(0x8000000000000000)))));		
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(mask.data(), _mm256_cmpgt_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(values)));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(mask.data(), _mm256_cmpgt_epi32(_mm256_xor_si256(_mm256_loadu_epi32(Data), _mm256_set1_epi32(static_cast<uint32_t>(0x80000000))), _mm256_xor_si256(_mm256_loadu_epi32(values), _mm256_set1_epi32(static_cast<uint32_t>(0x80000000)))));		
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(mask.data(), _mm256_cmpgt_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(values)));
+		else if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(mask.data(), _mm256_cmpgt_epi16(_mm256_xor_si256(_mm256_loadu_epi16(Data), _mm256_set1_epi16(static_cast<uint16_t>(0x8000))), _mm256_xor_si256(_mm256_loadu_epi16(values), _mm256_set1_epi16(static_cast<uint16_t>(0x8000)))));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(mask.data(), _mm256_cmpgt_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(values)));
+		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(mask.data(), _mm256_cmpgt_epi8(_mm256_xor_si256(_mm256_loadu_epi8(Data), _mm256_set1_epi8(static_cast<uint8_t>(0x80))), _mm256_xor_si256(_mm256_loadu_epi8(values), _mm256_set1_epi8(static_cast<uint8_t>(0x80)))));
+		return mask;
+	}
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	std::array<T, 32 / sizeof(T)> IsGreater(const std::array<T, 32 / sizeof(T)>& values) { return IsGreater(values.data()); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> IsGreater(const AVX256& values) { return IsGreater(values.Data); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> operator>(const T* values) { return IsGreater(values); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	std::array<T, 32 / sizeof(T)> operator>(const std::array<T, 32 / sizeof(T)>& values) { return IsGreater(values.data()); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> operator>(const AVX256& values) { return IsGreater(values.Data); }
+
+
+
 	// Sum ///////////
 
 	// Returns the sum of all packed elements. The result is returned in full precision except with 32-bit integers, whose sum is accumulated into 32-bits and hence can overflow. This function is not available for 64-bit integers.
