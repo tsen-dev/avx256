@@ -577,6 +577,24 @@ void testAVX256IsZero()
 	assert(avxULongs4.IsZero() == true);
 }
 
+void testAVX256IsEqual()
+{
+	AVX256<double> avxDoubles0{ {1, 2, 3, 4} }, avxDoubles1{ {1, 2, 3, 4} }, avxDoubles2{ {4, 3, 2, 1} };
+	AVX256<float> avxFloats0{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxFloats1{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxFloats2{ {8, 7, 6, 5, 4, 3, 2, 1} };
+	AVX256<uint64_t> avxULongs0{ {1, 2, 3, 4} }, avxULongs1{ {1, 2, 3, 4} }, avxULongs2{ {4, 3, 2, 1} };
+	AVX256<uint32_t> avxUInts0{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxUInts1{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxUInts2{ {8, 7, 6, 5, 4, 3, 2, 1} };
+
+	AVX256<double> avxDoubleMask01 = avxDoubles0 == avxDoubles1, avxDoubleMask10 = avxDoubles1.IsEqual(avxDoubles0), avxDoubleMask02 = avxDoubles0.IsEqual(avxDoubles2), avxDoubleMask20 = avxDoubles2.IsEqual(avxDoubles0);
+	AVX256<float> avxFloatMask01 = avxFloats0.IsEqual(avxFloats1), avxFloatMask10 = avxFloats1.IsEqual(avxFloats0), avxFloatMask02 = avxFloats0.IsEqual(avxFloats2), avxFloatMask20 = avxFloats2.IsEqual(avxFloats0);
+	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsEqual(avxULongs1), avxULongMask10 = avxULongs1.IsEqual(avxULongs0), avxULongMask02 = avxULongs0.IsEqual(avxULongs2), avxULongMask20 = avxULongs2.IsEqual(avxULongs0);
+	AVX256<uint32_t> avxUIntMask01 = avxUInts0.IsEqual(avxUInts1), avxUIntMask10 = avxUInts1.IsEqual(avxUInts0), avxUIntMask02 = avxUInts0.IsEqual(avxUInts2), avxUIntMask20 = avxUInts2.IsEqual(avxUInts0);
+
+	assert((~avxDoubleMask01).IsZero() && (~avxDoubleMask10).IsZero() && avxDoubleMask02.IsZero() && avxDoubleMask20.IsZero());
+	assert((~avxFloatMask01).IsZero() && (~avxFloatMask10).IsZero() && avxFloatMask02.IsZero() && avxFloatMask20.IsZero());
+	assert((~avxULongMask01).IsZero() && (~avxULongMask10).IsZero() && avxULongMask02.IsZero() && avxULongMask20.IsZero());
+	assert((~avxUIntMask01).IsZero() && (~avxUIntMask10).IsZero() && avxUIntMask02.IsZero() && avxUIntMask20.IsZero());
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -671,6 +689,7 @@ void runTests()
 	testAVX256ShiftLeft();
 	testAVX256ShiftRight();
 	testAVX256IsZero();
+	testAVX256IsEqual();
 	testAVX256Sum();
 	testAVX256Average();
 	

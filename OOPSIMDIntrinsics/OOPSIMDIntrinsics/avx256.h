@@ -52,7 +52,7 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Add(const std::array<T, 32 / sizeof(T)>& operand) { Add(&operand[0]); }
+	void Add(const std::array<T, 32 / sizeof(T)>& operand) { Add(operand.data()); }
 
 	void AddSaturate(const T* operand)
 	{
@@ -64,7 +64,7 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void AddSatuate(const std::array<T, 32 / sizeof(T)>& operand) { AddSatuate(&operand[0]); }
+	void AddSatuate(const std::array<T, 32 / sizeof(T)>& operand) { AddSatuate(operand.data()); }
 
 	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise
 	AVX256& operator+=(const T* operand) 
@@ -76,8 +76,8 @@ public:
 	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator+=(const std::array<T, 32 / sizeof(T)>& operand)
 	{
-		if constexpr (sizeof(T) > 2) { Add(&operand[0]);  return *this; }
-		else if constexpr (sizeof(T) <= 2) { AddSatuate(&operand[0]);  return *this; }
+		if constexpr (sizeof(T) > 2) { Add(operand.data());  return *this; }
+		else if constexpr (sizeof(T) <= 2) { AddSatuate(operand.data());  return *this; }
 	}
 
 	std::array<T, 32 / sizeof(T)> operator+(const T* operand)
@@ -107,7 +107,7 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Sub(const std::array<T, 32 / sizeof(T)>& operand) { Sub(&operand[0]); }
+	void Sub(const std::array<T, 32 / sizeof(T)>& operand) { Sub(operand.data()); }
 
 	void SubSaturate(const T* operand)
 	{
@@ -119,7 +119,7 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void SubSatuate(const std::array<T, 32 / sizeof(T)>& operand) { SubSatuate(&operand[0]); }
+	void SubSatuate(const std::array<T, 32 / sizeof(T)>& operand) { SubSatuate(operand.data()); }
 
 	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise
 	AVX256& operator-=(const T* operand)
@@ -131,8 +131,8 @@ public:
 	// Performs saturation arithmetic on 16 and 8 bit types, wraparound arithmetic otherwise. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator-=(const std::array<T, 32 / sizeof(T)>& operand)
 	{
-		if constexpr (sizeof(T) > 2) { Sub(&operand[0]);  return *this; }
-		else if constexpr (sizeof(T) <= 2) { SubSatuate(&operand[0]);  return *this; }
+		if constexpr (sizeof(T) > 2) { Sub(operand.data());  return *this; }
+		else if constexpr (sizeof(T) <= 2) { SubSatuate(operand.data());  return *this; }
 	}
 
 	
@@ -189,13 +189,13 @@ public:
 	}
 
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Mul(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); }
+	void Mul(const std::array<T, 32 / sizeof(T)>& operand) { Mul(operand.data()); }
 
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used.
 	AVX256& operator*=(const T* operand) { Mul(operand); return *this; }
 
 	// Call the Mul() method. For details on its operation, see the Mul() method for the AVX256 type being used. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { Mul(&operand[0]); return *this; }
+	AVX256& operator*=(const std::array<T, 32 / sizeof(T)>& operand) { Mul(operand.data()); return *this; }
 
 
 	// Division ///////////////////
@@ -208,12 +208,12 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Div(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); }
+	void Div(const std::array<T, 32 / sizeof(T)>& operand) { Div(operand.data()); }
 
 	AVX256& operator/=(const T* operand) { Div(operand); return *this; }
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(&operand[0]); return *this; }
+	AVX256& operator/=(const std::array<T, 32 / sizeof(T)>& operand) { Div(operand.data()); return *this; }
 
 
 	// Set // //////////////////
@@ -241,7 +241,7 @@ public:
 	}
 
 	// Copy the specified data into the data AVX256 points to. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); }
+	void Set(const std::array<T, 32 / sizeof(T)>& values) { Set(values.data()); }
 
 	// Broadcast the specified value into all elements of the AVX256 
 	AVX256& operator=(const T value) { Set(value); return *this; }
@@ -250,7 +250,7 @@ public:
 	AVX256& operator=(const T* values) { Set(values); return *this; }
 
 	// Copy the specified data into the data AVX256 points to. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(&values[0]); return *this; }	
+	AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values) { Set(values.data()); return *this; }	
 
 
 	// Clear //////////////////
@@ -294,12 +294,12 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void And(const std::array<T, 32 / sizeof(T)>& operand) { And(&operand[0]); }
+	void And(const std::array<T, 32 / sizeof(T)>& operand) { And(operand.data()); }
 
 	AVX256& operator&=(const T* operand) { And(operand); return *this; }
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator&=(const std::array<T, 32 / sizeof(T)>& operand) { And(&operand[0]); return *this; }
+	AVX256& operator&=(const std::array<T, 32 / sizeof(T)>& operand) { And(operand.data()); return *this; }
 
 
 	// Or ///////////
@@ -315,12 +315,12 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Or(const std::array<T, 32 / sizeof(T)>& operand) { Or(&operand[0]); }
+	void Or(const std::array<T, 32 / sizeof(T)>& operand) { Or(operand.data()); }
 
 	AVX256& operator|=(const T* operand) { Or(operand); return *this; }
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator|=(const std::array<T, 32 / sizeof(T)>& operand) { Or(&operand[0]); return *this; }
+	AVX256& operator|=(const std::array<T, 32 / sizeof(T)>& operand) { Or(operand.data()); return *this; }
 
 
 	// Xor ///////////
@@ -336,12 +336,12 @@ public:
 	}
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void Xor(const std::array<T, 32 / sizeof(T)>& operand) { Xor(&operand[0]); }
+	void Xor(const std::array<T, 32 / sizeof(T)>& operand) { Xor(operand.data()); }
 
 	AVX256& operator^=(const T* operand) { Xor(operand); return *this; }
 
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator^=(const std::array<T, 32 / sizeof(T)>& operand) { Xor(&operand[0]); return *this; }
+	AVX256& operator^=(const std::array<T, 32 / sizeof(T)>& operand) { Xor(operand.data()); return *this; }
 
 
 	// Shift /////////
@@ -364,7 +364,7 @@ public:
 	}
 
 	// Performs a logical left shift. Available on 32 and 64-bit integers only. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	void ShiftLeft(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftLeft(&shifts[0]); }
+	void ShiftLeft(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftLeft(shifts.data()); }
 
 	// Performs a logical left shift. Available on 64, 32, and 16-bit integers only.
 	AVX256& operator<<=(const int shift) { ShiftLeft(shift); return *this; }
@@ -373,7 +373,7 @@ public:
 	AVX256& operator<<=(const T* shifts) { ShiftLeft(shifts); return *this; }
 
 	// Performs a logical left shift. Available on 32 and 64-bit integers only. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	AVX256& operator<<=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftLeft(&shifts[0]); return *this; }
+	AVX256& operator<<=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftLeft(shifts.data()); return *this; }
 
 	/*
 	* Signed types (32 and 16-bit integers): Arithmetic shift
@@ -406,7 +406,7 @@ public:
 	* Unsigned types (64 and 32-bit integers): Logical shift
 	* If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	*/
-	void ShiftRight(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(&shifts[0]); }
+	void ShiftRight(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(shifts.data()); }
 
 	/*
 	* Signed types (32 and 16-bit integers): Arithmetic shift
@@ -425,7 +425,7 @@ public:
 	* Unsigned types (64 and 32-bit integers): Logical shift
 	* If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	*/
-	AVX256& operator>>=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(&shifts[0]); return *this; }
+	AVX256& operator>>=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(shifts.data()); return *this; }
 
 
 	// IsZero ///////////
@@ -443,6 +443,31 @@ public:
 	}	
 
 
+	// IsEqual /////////
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling
+	std::array<T, 32 / sizeof(T)> IsEqual(const T* values)
+	{
+		std::array<T, 32 / sizeof(T)> mask{};
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(mask.data(), _mm256_cmp_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(values), _CMP_EQ_UQ));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(mask.data(), _mm256_cmp_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(values), _CMP_EQ_UQ));
+		else if constexpr (std::is_same_v<T, uint64_t> || std::is_same_v<T, int64_t>) _mm256_storeu_epi64(mask.data(), _mm256_cmpeq_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(values)));
+		else if constexpr (std::is_same_v<T, uint32_t> || std::is_same_v<T, int32_t>) _mm256_storeu_epi32(mask.data(), _mm256_cmpeq_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(values)));
+		else if constexpr (std::is_same_v<T, uint16_t> || std::is_same_v<T, int16_t>) _mm256_storeu_epi16(mask.data(), _mm256_cmpeq_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(values)));
+		else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, int8_t>) _mm256_storeu_epi8(mask.data(), _mm256_cmpeq_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(values)));
+		return mask;
+	}
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	std::array<T, 32 / sizeof(T)> IsEqual(const std::array<T, 32 / sizeof(T)>& values) { return IsEqual(values.data()); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling
+	std::array<T, 32 / sizeof(T)> operator==(const T* values) { return IsEqual(values); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	std::array<T, 32 / sizeof(T)> operator==(const std::array<T, 32 / sizeof(T)>& values) { return IsEqual(values.data()); }
+
+
 	// Sum ///////////
 
 	// Returns the sum of all packed elements. The result is returned in full precision except with 32-bit integers, whose sum is accumulated into 32-bits and hence can overflow. This function is not available for 64-bit integers.
@@ -458,7 +483,7 @@ public:
 		else if constexpr (std::is_same_v<T, int8_t>)
 		{
 			__m256i sums = _mm256_sad_epu8( // sums = |0|0|0|s3+8*128|0|0|0|s2+8*128|0|0|0|s1+8*128|0|0|0|s0+8*128| (16-bit packing)
-				_mm256_add_epi8(_mm256_loadu_epi8(Data), _mm256_set1_epi8(static_cast<int8_t>(128))),
+				_mm256_xor_si256(_mm256_loadu_epi8(Data), _mm256_set1_epi8(static_cast<int8_t>(0x80))), // Add 128
 				_mm256_setzero_si256()
 			);
 			sums = _mm256_add_epi64(_mm256_permute4x64_epi64(sums, 0b00011011), sums); // sums = |0|0|0|s0+8*128|0|0|0|s1+8*128|0|0|0|s2+8*128|0|0|0|s3+8*128| + |0|0|0|s3+8*128|0|0|0|s2+8*128|0|0|0|s1+8*128|0|0|0|s0+8*128| = |0|s0+s3+16*128|0|s1+s2+16*128|0|s2+s1+16*128|0|s3+s0+16*128| (32-bit packing)			
@@ -582,18 +607,18 @@ public:
 		{
 			_mm256_storeu_epi16(
 				Data,
-				_mm256_add_epi16(
+				_mm256_xor_si256( // Subrtract 32768
 					_mm256_avg_epu16(
-						_mm256_add_epi16(
+						_mm256_xor_si256( // Add 32768
 							_mm256_loadu_epi16(Data), 
-							_mm256_set1_epi16(static_cast<int16_t>(32768))
+							_mm256_set1_epi16(static_cast<int16_t>(0x8000))
 						),
-						_mm256_add_epi16(
+						_mm256_xor_si256( // Add 32768
 							_mm256_loadu_epi16(operand),
-							_mm256_set1_epi16(static_cast<int16_t>(32768))
+							_mm256_set1_epi16(static_cast<int16_t>(0x8000))
 						)
 					),
-					_mm256_set1_epi16(static_cast<int16_t>(-32768))
+					_mm256_set1_epi16(static_cast<int16_t>(0x8000))
 				)
 			);
 		}
@@ -601,21 +626,21 @@ public:
 		else if constexpr (std::is_same_v<T, int8_t>) 
 		{ 
 			_mm256_storeu_epi8(
-				Data, 
-				_mm256_add_epi8(
+				Data,
+				_mm256_xor_si256( // Subract 128
 					_mm256_avg_epu8(
-						_mm256_add_epi8(
-							_mm256_loadu_epi8(Data), 
-							_mm256_set1_epi8(static_cast<int8_t>(128))
-						), 
-						_mm256_add_epi8(
-							_mm256_loadu_epi8(operand), 
-							_mm256_set1_epi8(static_cast<int8_t>(128))
+						_mm256_xor_si256( // Add 128
+							_mm256_loadu_epi8(Data),
+							_mm256_set1_epi8(static_cast<int8_t>(0x80))
+						),
+						_mm256_xor_si256( // Add 128
+							_mm256_loadu_epi8(operand),
+							_mm256_set1_epi8(static_cast<int8_t>(0x80))
 						)
-					), 
-					_mm256_set1_epi8(static_cast<int8_t>(-128))
+					),
+					_mm256_set1_epi8(static_cast<int8_t>(0x80))
 				)
-			); 
+			);
 		}
 		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for 16 and 8-bit integers"); }
 	}
