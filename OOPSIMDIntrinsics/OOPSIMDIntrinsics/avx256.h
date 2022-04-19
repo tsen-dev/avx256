@@ -33,6 +33,8 @@ public:
 
 	operator T* () { return Data; }
 
+	operator bool() { return IsZero(); }
+
 	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Next() { Data += (256 / 8) / sizeof(T); } 
 	
@@ -425,6 +427,20 @@ public:
 	* If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	*/
 	AVX256& operator>>=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(&shifts[0]); return *this; }
+
+
+	// IsZero ///////////
+
+	bool IsZero() 
+	{ 
+		if constexpr (std::is_same_v<T, double>) switch (_mm256_testz_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(Data))) { case 0: return false; case 1: return true; }
+		else if constexpr (std::is_same_v<T, float>) switch (_mm256_testz_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(Data))) { case 0: return false; case 1: return true; }
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) switch (_mm256_testz_si256(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(Data))) { case 0: return false; case 1: return true; }
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) switch (_mm256_testz_si256(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(Data))) { case 0: return false; case 1: return true; }
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) switch (_mm256_testz_si256(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(Data))) { case 0: return false; case 1: return true; }
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) switch (_mm256_testz_si256(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(Data))) { case 0: return false; case 1: return true; }
+		return false;
+	}	
 
 
 	// Sum ///////////

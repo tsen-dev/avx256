@@ -562,6 +562,21 @@ void testAVX256ShiftRight()
 	for (int i = 1; i <= 8; ++i) assert(avxInts3[i - 1] == INT32_MAX / (1 << i));
 }
 
+void testAVX256IsZero()
+{
+	AVX256<uint64_t> avxULongs0{ {0, 0, 0, 1} };
+	AVX256<uint64_t> avxULongs1{ {0, 0, 1, 0} };
+	AVX256<uint64_t> avxULongs2{ {0, 1, 0, 0} };
+	AVX256<uint64_t> avxULongs3{ {1, 0, 0, 0} };
+	AVX256<uint64_t> avxULongs4{ {0, 0, 0, 0} };
+
+	assert(avxULongs0.IsZero() == false);
+	assert(avxULongs1.IsZero() == false);
+	assert(avxULongs2.IsZero() == false);
+	assert(avxULongs3.IsZero() == false);
+	assert(avxULongs4.IsZero() == true);
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -637,6 +652,7 @@ void runTests()
 	testAVX256Xor();
 	testAVX256ShiftLeft();
 	testAVX256ShiftRight();
+	testAVX256IsZero();
 	testAVX256Sum();
 	testAVX256Average();
 	
