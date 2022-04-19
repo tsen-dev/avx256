@@ -584,10 +584,10 @@ void testAVX256IsEqual()
 	AVX256<uint64_t> avxULongs0{ {1, 2, 3, 4} }, avxULongs1{ {1, 2, 3, 4} }, avxULongs2{ {4, 3, 2, 1} };
 	AVX256<uint32_t> avxUInts0{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxUInts1{ {1, 2, 3, 4, 5, 6, 7, 8} }, avxUInts2{ {8, 7, 6, 5, 4, 3, 2, 1} };
 
-	AVX256<double> avxDoubleMask01 = avxDoubles0.IsEqual(avxDoubles1), avxDoubleMask10 = avxDoubles1.IsEqual(avxDoubles0), avxDoubleMask02 = avxDoubles0.IsEqual(avxDoubles2), avxDoubleMask20 = avxDoubles2.IsEqual(avxDoubles0);
-	AVX256<float> avxFloatMask01 = avxFloats0.IsEqual(avxFloats1), avxFloatMask10 = avxFloats1.IsEqual(avxFloats0), avxFloatMask02 = avxFloats0.IsEqual(avxFloats2), avxFloatMask20 = avxFloats2.IsEqual(avxFloats0);
-	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsEqual(avxULongs1), avxULongMask10 = avxULongs1.IsEqual(avxULongs0), avxULongMask02 = avxULongs0.IsEqual(avxULongs2), avxULongMask20 = avxULongs2.IsEqual(avxULongs0);
-	AVX256<uint32_t> avxUIntMask01 = avxUInts0.IsEqual(avxUInts1), avxUIntMask10 = avxUInts1.IsEqual(avxUInts0), avxUIntMask02 = avxUInts0.IsEqual(avxUInts2), avxUIntMask20 = avxUInts2.IsEqual(avxUInts0);
+	AVX256<double> avxDoubleMask01 = avxDoubles0.IsEqualTo(avxDoubles1), avxDoubleMask10 = avxDoubles1.IsEqualTo(avxDoubles0), avxDoubleMask02 = avxDoubles0.IsEqualTo(avxDoubles2), avxDoubleMask20 = avxDoubles2.IsEqualTo(avxDoubles0);
+	AVX256<float> avxFloatMask01 = avxFloats0.IsEqualTo(avxFloats1), avxFloatMask10 = avxFloats1.IsEqualTo(avxFloats0), avxFloatMask02 = avxFloats0.IsEqualTo(avxFloats2), avxFloatMask20 = avxFloats2.IsEqualTo(avxFloats0);
+	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsEqualTo(avxULongs1), avxULongMask10 = avxULongs1.IsEqualTo(avxULongs0), avxULongMask02 = avxULongs0.IsEqualTo(avxULongs2), avxULongMask20 = avxULongs2.IsEqualTo(avxULongs0);
+	AVX256<uint32_t> avxUIntMask01 = avxUInts0.IsEqualTo(avxUInts1), avxUIntMask10 = avxUInts1.IsEqualTo(avxUInts0), avxUIntMask02 = avxUInts0.IsEqualTo(avxUInts2), avxUIntMask20 = avxUInts2.IsEqualTo(avxUInts0);
 
 	assert((~avxDoubleMask01).IsZero() && (~avxDoubleMask10).IsZero() && avxDoubleMask02.IsZero() && avxDoubleMask20.IsZero());
 	assert((~avxFloatMask01).IsZero() && (~avxFloatMask10).IsZero() && avxFloatMask02.IsZero() && avxFloatMask20.IsZero());
@@ -602,10 +602,10 @@ void testAVX256IsGreater()
 	AVX256<uint64_t> avxULongs0{ {UINT64_MAX, 2, 3, 4} }, avxULongs1{ {0, 1, 2, 3} }, avxULongs2{ {UINT64_MAX, 2, 4, 5} };
 	AVX256<int64_t> avxLongs0{ {-1, -2, 3, 4} }, avxLongs1{ {-2, -3, -1, 2} }, avxLongs2{ {-1, -2, 4, 5} };
 
-	AVX256<double> avxDoubleMask01 = avxDoubles0.IsGreater(avxDoubles1), avxDoubleMask10 = avxDoubles1.IsGreater(avxDoubles0), avxDoubleMask02 = avxDoubles0.IsGreater(avxDoubles2);
-	AVX256<float> avxFloatMask01 = avxFloats0.IsGreater(avxFloats1), avxFloatMask10 = avxFloats1.IsGreater(avxFloats0), avxFloatMask02 = avxFloats0.IsGreater(avxFloats2);
-	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsGreater(avxULongs1), avxULongMask10 = avxULongs1.IsGreater(avxULongs0), avxULongMask02 = avxULongs0.IsGreater(avxULongs2);
-	AVX256<int64_t> avxLongMask01 = avxLongs0.IsGreater(avxLongs1), avxLongMask10 = avxLongs1.IsGreater(avxLongs0), avxLongMask02 = avxLongs0.IsGreater(avxLongs2);
+	AVX256<double> avxDoubleMask01 = avxDoubles0.IsGreaterThan(avxDoubles1), avxDoubleMask10 = avxDoubles1.IsGreaterThan(avxDoubles0), avxDoubleMask02 = avxDoubles0.IsGreaterThan(avxDoubles2);
+	AVX256<float> avxFloatMask01 = avxFloats0.IsGreaterThan(avxFloats1), avxFloatMask10 = avxFloats1.IsGreaterThan(avxFloats0), avxFloatMask02 = avxFloats0.IsGreaterThan(avxFloats2);
+	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsGreaterThan(avxULongs1), avxULongMask10 = avxULongs1.IsGreaterThan(avxULongs0), avxULongMask02 = avxULongs0.IsGreaterThan(avxULongs2);
+	AVX256<int64_t> avxLongMask01 = avxLongs0.IsGreaterThan(avxLongs1), avxLongMask10 = avxLongs1.IsGreaterThan(avxLongs0), avxLongMask02 = avxLongs0.IsGreaterThan(avxLongs2);
 
 	assert((~avxDoubleMask01).IsZero() && avxDoubleMask10.IsZero() && avxDoubleMask02.IsZero());
 	assert((~avxFloatMask01).IsZero() && avxFloatMask10.IsZero() && avxFloatMask02.IsZero());

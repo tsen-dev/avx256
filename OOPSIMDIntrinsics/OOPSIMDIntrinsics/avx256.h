@@ -503,10 +503,10 @@ public:
 	}	
 
 
-	// IsEqual /////////
+	// IsEqualTo /////////
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling
-	std::array<T, 32 / sizeof(T)> IsEqual(const T* values)
+	std::array<T, 32 / sizeof(T)> IsEqualTo(const T* values)
 	{
 		std::array<T, 32 / sizeof(T)> mask{};
 		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(mask.data(), _mm256_cmp_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(values), _CMP_EQ_UQ));
@@ -519,25 +519,25 @@ public:
 	}
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	std::array<T, 32 / sizeof(T)> IsEqual(const std::array<T, 32 / sizeof(T)>& values) { return IsEqual(values.data()); }
+	std::array<T, 32 / sizeof(T)> IsEqualTo(const std::array<T, 32 / sizeof(T)>& values) { return IsEqualTo(values.data()); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling
-	std::array<T, 32 / sizeof(T)> IsEqual(const AVX256& values) { return IsEqual(values.Data); }
+	std::array<T, 32 / sizeof(T)> IsEqualTo(const AVX256& values) { return IsEqualTo(values.Data); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling
-	std::array<T, 32 / sizeof(T)> operator==(const T* values) { return IsEqual(values); }
+	std::array<T, 32 / sizeof(T)> operator==(const T* values) { return IsEqualTo(values); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	std::array<T, 32 / sizeof(T)> operator==(const std::array<T, 32 / sizeof(T)>& values) { return IsEqual(values.data()); }
+	std::array<T, 32 / sizeof(T)> operator==(const std::array<T, 32 / sizeof(T)>& values) { return IsEqualTo(values.data()); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are unordered and non-signaling
-	std::array<T, 32 / sizeof(T)> operator==(const AVX256& values) { return IsEqual(values.Data); }
+	std::array<T, 32 / sizeof(T)> operator==(const AVX256& values) { return IsEqualTo(values.Data); }
 
 
-	// IsGreater /////////
+	// IsGreaterThan /////////
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
-	std::array<T, 32 / sizeof(T)> IsGreater(const T* values)
+	std::array<T, 32 / sizeof(T)> IsGreaterThan(const T* values)
 	{
 		std::array<T, 32 / sizeof(T)> mask{};
 		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(mask.data(), _mm256_cmp_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(values), _CMP_GT_OQ));
@@ -554,19 +554,19 @@ public:
 	}
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	std::array<T, 32 / sizeof(T)> IsGreater(const std::array<T, 32 / sizeof(T)>& values) { return IsGreater(values.data()); }
+	std::array<T, 32 / sizeof(T)> IsGreaterThan(const std::array<T, 32 / sizeof(T)>& values) { return IsGreaterThan(values.data()); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
-	std::array<T, 32 / sizeof(T)> IsGreater(const AVX256& values) { return IsGreater(values.Data); }
+	std::array<T, 32 / sizeof(T)> IsGreaterThan(const AVX256& values) { return IsGreaterThan(values.Data); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
-	std::array<T, 32 / sizeof(T)> operator>(const T* values) { return IsGreater(values); }
+	std::array<T, 32 / sizeof(T)> operator>(const T* values) { return IsGreaterThan(values); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
-	std::array<T, 32 / sizeof(T)> operator>(const std::array<T, 32 / sizeof(T)>& values) { return IsGreater(values.data()); }
+	std::array<T, 32 / sizeof(T)> operator>(const std::array<T, 32 / sizeof(T)>& values) { return IsGreaterThan(values.data()); }
 
 	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
-	std::array<T, 32 / sizeof(T)> operator>(const AVX256& values) { return IsGreater(values.Data); }
+	std::array<T, 32 / sizeof(T)> operator>(const AVX256& values) { return IsGreaterThan(values.Data); }
 
 
 
