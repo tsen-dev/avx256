@@ -26,6 +26,9 @@ public:
 	// Creates an AVX256 that points to a newly created copy of the specified array. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256(const std::array<T, 32 / sizeof(T)>& data) : Data{ new T[32 / sizeof(T)] }, OwnsData{ true } { std::copy(data.cbegin(), data.cend(), Data); }
 
+	// Moves the data of the specifed AVX256 into a new AVX256
+	AVX256(AVX256&& avx) noexcept : Data{ avx.Data }, OwnsData{ true }  { avx.Data = nullptr; }
+
 	T& operator[] (int index) const { return Data[index]; }	
 
 	operator T* () { return Data; }
@@ -82,10 +85,11 @@ public:
 
 	AVX256 operator+(const T* operand)
 	{
-		AVX256<T> x{};
-		x = Data;
+		T* data = new T[32 / sizeof(T)];
+		std::copy(Data, Data + 32 / sizeof(T), data);
+		AVX256<T> x{data};
 		x += operand;
-		return x;
+		return x; 
 	}
 
 
@@ -338,6 +342,89 @@ public:
 	// If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
 	AVX256& operator^=(const std::array<T, 32 / sizeof(T)>& operand) { Xor(&operand[0]); return *this; }
 
+
+	// Shift /////////
+
+	// Performs a logical left shift. Available on 64, 32, and 16-bit integers only.
+	void ShiftLeft(const int shift)
+	{
+		if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_slli_epi64(_mm256_loadu_epi64(Data), shift));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_slli_epi32(_mm256_loadu_epi32(Data), shift));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_slli_epi16(_mm256_loadu_epi16(Data), shift));
+		else if constexpr (true) static_assert(false, "AVX256: ShiftLeft(shift) is not available for floating-point types or 8-bit integers");
+	}
+
+	// Performs a logical left shift. Available on 32 and 64-bit integers only.
+	void ShiftLeft(const T* shifts)
+	{
+		if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_sllv_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(shifts)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_sllv_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(shifts)));
+		else if constexpr (true) static_assert(false, "AVX256: ShiftLeft(shifts) is only 32 and 64-bit integers");
+	}
+
+	// Performs a logical left shift. Available on 32 and 64-bit integers only. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	void ShiftLeft(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftLeft(&shifts[0]); }
+
+	// Performs a logical left shift. Available on 64, 32, and 16-bit integers only.
+	AVX256& operator<<=(const int shift) { ShiftLeft(shift); return *this; }
+
+	// Performs a logical left shift. Available on 32 and 64-bit integers only.
+	AVX256& operator<<=(const T* shifts) { ShiftLeft(shifts); return *this; }
+
+	// Performs a logical left shift. Available on 32 and 64-bit integers only. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	AVX256& operator<<=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftLeft(&shifts[0]); return *this; }
+
+	/*
+	* Signed types (32 and 16-bit integers): Arithmetic shift
+	* Unsigned types (64, 32, and 16-bit integers): Logical shift
+	*/
+	void ShiftRight(const int shift)
+	{
+		if constexpr (std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_srli_epi64(_mm256_loadu_epi64(Data), shift));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_srli_epi32(_mm256_loadu_epi32(Data), shift));
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_srai_epi32(_mm256_loadu_epi32(Data), shift));
+		else if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_srli_epi16(_mm256_loadu_epi16(Data), shift));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_srai_epi16(_mm256_loadu_epi16(Data), shift));
+		else if constexpr (true) { static_assert(false, "AVX256: ShiftRight(shift) is only available for 64 (unsigned), 32, and 16-bit integers"); }
+	}
+
+	/*
+	* Signed types (32-bit integers): Arithmetic shift
+	* Unsigned types (64 and 32-bit integers): Logical shift
+	*/
+	void ShiftRight(const T* shifts)
+	{
+		if constexpr (std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_srlv_epi64(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(shifts)));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_srlv_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(shifts)));
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_srav_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(shifts)));
+		else if constexpr (true) static_assert(false, "AVX256: ShiftRight(shifts) is only available for 64 (unsigned) and 32-bit integers");
+	}
+
+	/*
+	* Signed types (32-bit integers): Arithmetic shift
+	* Unsigned types (64 and 32-bit integers): Logical shift
+	* If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	*/
+	void ShiftRight(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(&shifts[0]); }
+
+	/*
+	* Signed types (32 and 16-bit integers): Arithmetic shift
+	* Unsigned types (64, 32, and 16-bit integers): Logical shift
+	*/
+	AVX256& operator>>=(const int shift) { ShiftRight(shift); return *this; }
+
+	/*
+	* Signed types (32-bit integers): Arithmetic shift
+	* Unsigned types (64 and 32-bit integers): Logical shift
+	*/
+	AVX256& operator>>=(const T* shifts) { ShiftRight(shifts); return *this; }
+
+	/*
+	* Signed types (32-bit integers): Arithmetic shift
+	* Unsigned types (64 and 32-bit integers): Logical shift
+	* If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	*/
+	AVX256& operator>>=(const std::array<T, 32 / sizeof(T)>& shifts) { ShiftRight(&shifts[0]); return *this; }
 
 
 	// Sum ///////////

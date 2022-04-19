@@ -514,6 +514,54 @@ void testAVX256Xor()
 	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == 0; }));
 }
 
+void testAVX256ShiftLeft()
+{
+	AVX256<uint64_t> avxULongs{ {1, 1, 1, 1} };
+	AVX256<int64_t> avxLongs{ {-1, -1, -1, -1} };
+
+	avxULongs.ShiftLeft(1);
+	avxLongs.ShiftLeft(1);
+
+	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 2; }));
+	assert(std::all_of(avxLongs.Data, avxLongs.Data + 4, [](int64_t element) {return element == -2; }));
+
+	AVX256<uint32_t> avxUInts{ {1, 1, 1, 1, 1, 1, 1, 1} };
+	AVX256<int32_t> avxInts{ {-1, -1, -1, -1, -1, -1, -1, -1} };
+
+	avxUInts.ShiftLeft({ 1, 2, 3, 4, 5, 6, 7, 8 });
+	avxInts.ShiftLeft({ 1, 2, 3, 4, 5, 6, 7, 8 });
+
+	for (int i = 1; i <= 8; ++i) assert(avxUInts[i-1] == 1 << i);
+	for (int i = 1; i <= 8; ++i) assert(avxInts[i-1] == -(1 << i));
+}
+
+void testAVX256ShiftRight()
+{
+	AVX256<uint32_t> avxUInts{ {UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX} };
+	AVX256<int32_t> avxInts0{ {INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN} };
+	AVX256<int32_t> avxInts1{ {INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX} };
+
+	avxUInts.ShiftRight(1);
+	avxInts0.ShiftRight(1);
+	avxInts1.ShiftRight(1);
+
+	assert(std::all_of(avxUInts.Data, avxUInts.Data + 4, [](uint32_t element) {return element == UINT32_MAX / 2; }));
+	assert(std::all_of(avxInts0.Data, avxInts0.Data + 4, [](int32_t element) {return element == INT32_MIN / 2; }));
+	assert(std::all_of(avxInts1.Data, avxInts1.Data + 4, [](int32_t element) {return element == INT32_MAX / 2; }));
+
+	AVX256<uint32_t> avxUInts1{ {UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX} };
+	AVX256<int32_t> avxInts2{ {INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN, INT32_MIN} };
+	AVX256<int32_t> avxInts3{ {INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX, INT32_MAX} };
+
+	avxUInts1.ShiftRight({ 1, 2, 3, 4, 5, 6, 7, 8 });
+	avxInts2.ShiftRight({ 1, 2, 3, 4, 5, 6, 7, 8 });
+	avxInts3.ShiftRight({ 1, 2, 3, 4, 5, 6, 7, 8 });
+
+	for (int i = 1; i <= 8; ++i) assert(avxUInts1[i - 1] == UINT32_MAX / (1 << i));
+	for (int i = 1; i <= 8; ++i) assert(avxInts2[i - 1] == INT32_MIN / (1 << i));
+	for (int i = 1; i <= 8; ++i) assert(avxInts3[i - 1] == INT32_MAX / (1 << i));
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -587,6 +635,8 @@ void runTests()
 	testAVX256And();
 	testAVX256Or();
 	testAVX256Xor();
+	testAVX256ShiftLeft();
+	testAVX256ShiftRight();
 	testAVX256Sum();
 	testAVX256Average();
 	
@@ -600,11 +650,7 @@ int main()
 
 	AVX256<double> x{ {1, 2, 3, 4} };
 	AVX256<double> y{ {4, 3, 2, 1} };
-	AVX256<double> result = x + y;
-	std::cout << result;
-	int* z = new int;
-	*z = 10;
-	delete z;
+	AVX256<double> z = (x + y) + x; 
 	std::cout << z;
 
 	return 0;
