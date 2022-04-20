@@ -476,13 +476,13 @@ void testAVX256Clear()
 	assert(std::all_of(std::begin(myChars), std::end(myChars), [](int8_t element) {return element == 0; }));
 }
 
-void testAVX256Not()
+void testAVX256Negate()
 {
 	AVX256<uint64_t> avxULongs{ {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX} };
 	AVX256<double> avxDoubles{ {std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()} };
 
-	avxULongs.Not();
-	avxDoubles.Not();
+	avxULongs.Negate();
+	avxDoubles.Negate();
 
 	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
 	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == std::numeric_limits<double>::min(); }));
@@ -599,10 +599,10 @@ void testAVX256IsEqualTo()
 	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsEqualTo(avxULongs1), avxULongMask10 = avxULongs1.IsEqualTo(avxULongs0), avxULongMask02 = avxULongs0.IsEqualTo(avxULongs2), avxULongMask20 = avxULongs2.IsEqualTo(avxULongs0);
 	AVX256<uint32_t> avxUIntMask01 = avxUInts0.IsEqualTo(avxUInts1), avxUIntMask10 = avxUInts1.IsEqualTo(avxUInts0), avxUIntMask02 = avxUInts0.IsEqualTo(avxUInts2), avxUIntMask20 = avxUInts2.IsEqualTo(avxUInts0);
 
-	assert((~avxDoubleMask01).IsZero() && (~avxDoubleMask10).IsZero() && avxDoubleMask02.IsZero() && avxDoubleMask20.IsZero());
-	assert((~avxFloatMask01).IsZero() && (~avxFloatMask10).IsZero() && avxFloatMask02.IsZero() && avxFloatMask20.IsZero());
-	assert((~avxULongMask01).IsZero() && (~avxULongMask10).IsZero() && avxULongMask02.IsZero() && avxULongMask20.IsZero());
-	assert((~avxUIntMask01).IsZero() && (~avxUIntMask10).IsZero() && avxUIntMask02.IsZero() && avxUIntMask20.IsZero());
+	assert(avxDoubleMask01.Negate().IsZero() && avxDoubleMask10.Negate().IsZero() && avxDoubleMask02.IsZero() && avxDoubleMask20.IsZero());
+	assert(avxFloatMask01.Negate().IsZero() && avxFloatMask10.Negate().IsZero() && avxFloatMask02.IsZero() && avxFloatMask20.IsZero());
+	assert(avxULongMask01.Negate().IsZero() && avxULongMask10.Negate().IsZero() && avxULongMask02.IsZero() && avxULongMask20.IsZero());
+	assert(avxUIntMask01.Negate().IsZero() && avxUIntMask10.Negate().IsZero() && avxUIntMask02.IsZero() && avxUIntMask20.IsZero());
 }
 
 void testAVX256IsGreaterThan()
@@ -617,10 +617,10 @@ void testAVX256IsGreaterThan()
 	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsGreaterThan(avxULongs1), avxULongMask10 = avxULongs1.IsGreaterThan(avxULongs0), avxULongMask02 = avxULongs0.IsGreaterThan(avxULongs2);
 	AVX256<int64_t> avxLongMask01 = avxLongs0.IsGreaterThan(avxLongs1), avxLongMask10 = avxLongs1.IsGreaterThan(avxLongs0), avxLongMask02 = avxLongs0.IsGreaterThan(avxLongs2);
 
-	assert((~avxDoubleMask01).IsZero() && avxDoubleMask10.IsZero() && avxDoubleMask02.IsZero());
-	assert((~avxFloatMask01).IsZero() && avxFloatMask10.IsZero() && avxFloatMask02.IsZero());
-	assert((~avxULongMask01).IsZero() && avxULongMask10.IsZero() && avxULongMask02.IsZero());
-	assert((~avxLongMask01).IsZero() && avxLongMask10.IsZero() && avxLongMask02.IsZero());
+	assert(avxDoubleMask01.Negate().IsZero() && avxDoubleMask10.IsZero() && avxDoubleMask02.IsZero());
+	assert(avxFloatMask01.Negate().IsZero() && avxFloatMask10.IsZero() && avxFloatMask02.IsZero());
+	assert(avxULongMask01.Negate().IsZero() && avxULongMask10.IsZero() && avxULongMask02.IsZero());
+	assert(avxLongMask01.Negate().IsZero() && avxLongMask10.IsZero() && avxLongMask02.IsZero());
 }
 
 void testAVX256IsLessThan()
@@ -635,10 +635,10 @@ void testAVX256IsLessThan()
 	AVX256<uint64_t> avxULongMask01 = avxULongs0.IsLessThan(avxULongs1), avxULongMask10 = avxULongs1.IsLessThan(avxULongs0), avxULongMask02 = avxULongs0.IsLessThan(avxULongs2);
 	AVX256<int64_t> avxLongMask01 = avxLongs0.IsLessThan(avxLongs1), avxLongMask10 = avxLongs1.IsLessThan(avxLongs0), avxLongMask02 = avxLongs0.IsLessThan(avxLongs2);
 
-	assert((~avxDoubleMask01).IsZero() && avxDoubleMask10.IsZero() && avxDoubleMask02.IsZero());
-	assert((~avxFloatMask01).IsZero() && avxFloatMask10.IsZero() && avxFloatMask02.IsZero());
-	assert((~avxULongMask01).IsZero() && avxULongMask10.IsZero() && avxULongMask02.IsZero());
-	assert((~avxLongMask01).IsZero() && avxLongMask10.IsZero() && avxLongMask02.IsZero());
+	assert(avxDoubleMask01.Negate().IsZero() && avxDoubleMask10.IsZero() && avxDoubleMask02.IsZero());
+	assert(avxFloatMask01.Negate().IsZero() && avxFloatMask10.IsZero() && avxFloatMask02.IsZero());
+	assert(avxULongMask01.Negate().IsZero() && avxULongMask10.IsZero() && avxULongMask02.IsZero());
+	assert(avxLongMask01.Negate().IsZero() && avxLongMask10.IsZero() && avxLongMask02.IsZero());
 }
 
 void testAVX256Sum()
@@ -728,7 +728,7 @@ void runTests()
 	testAVX256Div();
 	testAVX256Set();
 	testAVX256Clear();	
-	testAVX256Not();
+	testAVX256Negate();
 	testAVX256And();
 	testAVX256Or();
 	testAVX256Xor();
@@ -745,12 +745,13 @@ void runTests()
 
 int main()
 {
-	//runTests();
+	runTests();
 
-	//std::cout << "All tests passed\n";
+	std::cout << "All tests passed\n";
 
 	AVX256<uint64_t> x{ {1, 2, 3, 4} };
-	std::cout << AVX256<uint64_t>{x << 1};
+	std::cout << AVX256<double>{AVX256<double>{(double*)(x.Data)} / AVX256<double>{(double*)(x.Data)}};
+	//std::cout << AVX256<uint64_t>{x << 1};
 
 	return 0;
 }

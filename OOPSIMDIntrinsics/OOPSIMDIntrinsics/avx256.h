@@ -369,9 +369,9 @@ public:
 	}
 
 
-	// Not ///////////
+	// Negate ///////////
 
-	AVX256& Not()
+	AVX256& Negate()
 	{
 		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_andnot_pd(_mm256_loadu_pd(Data), _mm256_set1_pd(1)));
 		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_andnot_ps(_mm256_loadu_ps(Data), _mm256_set1_ps(1)));
@@ -382,7 +382,18 @@ public:
 		return *this;
 	}
 
-	AVX256& operator~() { Not(); return *this; }
+	std::array<T, 32 / sizeof(T)> operator~() 
+	{
+		std::array<T, 32 / sizeof(T)> result{};
+		T* dataOld = Data;
+		Data = result.data();
+
+		this->Set(dataOld);
+		*this->Negate();
+
+		Data = dataOld;
+		return result;
+	}
 
 
 	// And ///////////
