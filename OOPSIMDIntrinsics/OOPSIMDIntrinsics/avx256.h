@@ -31,8 +31,6 @@ public:
 
 	T& operator[] (int index) const { return Data[index]; }	
 
-	operator T* () { return Data; }
-
 	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Next() { Data += (256 / 8) / sizeof(T); } 
 	
@@ -86,7 +84,7 @@ public:
 	// Performs saturation arithmetic on 16 and 8-bit integers, wraparound arithmetic otherwise
 	AVX256& operator+=(const AVX256& operand) { operator+=(operand.Data); return *this; }
 
-	std::array<T, 32 / sizeof(T)> operator+(const T* operand)
+	std::array<T, 32 / sizeof(T)> operator+(const AVX256& operand)
 	{
 		std::array<T, 32 / sizeof(T)> result{};
 		T* dataOld = Data;
@@ -569,6 +567,40 @@ public:
 	std::array<T, 32 / sizeof(T)> operator>(const AVX256& values) { return IsGreaterThan(values.Data); }
 
 
+	// IsLessThan /////////
+
+// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> IsLessThan(const T* values)
+	{
+		std::array<T, 32 / sizeof(T)> mask{};
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(mask.data(), _mm256_cmp_pd(_mm256_loadu_pd(values), _mm256_loadu_pd(Data), _CMP_GT_OQ));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(mask.data(), _mm256_cmp_ps(_mm256_loadu_ps(values), _mm256_loadu_ps(Data), _CMP_GT_OQ));
+		else if constexpr (std::is_same_v<T, int64_t>) _mm256_storeu_epi64(mask.data(), _mm256_cmpgt_epi64(_mm256_loadu_epi64(values), _mm256_loadu_epi64(Data)));
+		else if constexpr (std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(mask.data(), _mm256_cmpgt_epi64(_mm256_xor_si256(_mm256_loadu_epi64(values), _mm256_set1_epi64x(static_cast<uint64_t>(0x8000000000000000))), _mm256_xor_si256(_mm256_loadu_epi64(Data), _mm256_set1_epi64x(static_cast<uint64_t>(0x8000000000000000)))));
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(mask.data(), _mm256_cmpgt_epi32(_mm256_loadu_epi32(values), _mm256_loadu_epi32(Data)));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(mask.data(), _mm256_cmpgt_epi32(_mm256_xor_si256(_mm256_loadu_epi32(values), _mm256_set1_epi32(static_cast<uint32_t>(0x80000000))), _mm256_xor_si256(_mm256_loadu_epi32(Data), _mm256_set1_epi32(static_cast<uint32_t>(0x80000000)))));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(mask.data(), _mm256_cmpgt_epi16(_mm256_loadu_epi16(values), _mm256_loadu_epi16(Data)));
+		else if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(mask.data(), _mm256_cmpgt_epi16(_mm256_xor_si256(_mm256_loadu_epi16(values), _mm256_set1_epi16(static_cast<uint16_t>(0x8000))), _mm256_xor_si256(_mm256_loadu_epi16(Data), _mm256_set1_epi16(static_cast<uint16_t>(0x8000)))));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(mask.data(), _mm256_cmpgt_epi8(_mm256_loadu_epi8(values), _mm256_loadu_epi8(Data)));
+		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(mask.data(), _mm256_cmpgt_epi8(_mm256_xor_si256(_mm256_loadu_epi8(values), _mm256_set1_epi8(static_cast<uint8_t>(0x80))), _mm256_xor_si256(_mm256_loadu_epi8(Data), _mm256_set1_epi8(static_cast<uint8_t>(0x80)))));
+		return mask;
+	}
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	std::array<T, 32 / sizeof(T)> IsLessThan(const std::array<T, 32 / sizeof(T)>& values) { return IsLessThan(values.data()); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> IsLessThan(const AVX256& values) { return IsLessThan(values.Data); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> operator<(const T* values) { return IsLessThan(values); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling. If the number of items in the aggregate initialiser is less than the number of packed items in AVX256, the unspecified items are set to 0
+	std::array<T, 32 / sizeof(T)> operator<(const std::array<T, 32 / sizeof(T)>& values) { return IsLessThan(values.data()); }
+
+	// Returns a condition mask where each element whose corresponding condition evaluated to true is set to all 1's, otherwise to all 0's. Floating-point comparisons are ordered and non-signaling
+	std::array<T, 32 / sizeof(T)> operator<(const AVX256& values) { return IsLessThan(values.Data); }
+
 
 	// Sum ///////////
 
@@ -750,6 +782,7 @@ public:
 	// Computes the mean of corresponding elements, fractional results are rounded up to the nearest integer. This function is only available for 16 and 8-bit integers
 	void Average(const AVX256& operand) { Average(operand.Data); }
 
+	friend void testAVX256Constructor();
 
 	private:		
 		bool OwnsData; // Specifies whether the memory 'Data' points to was allocated at the constructor
