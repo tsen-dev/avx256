@@ -745,13 +745,12 @@ void runTests()
 
 int main()
 {
-	runTests();
+	//runTests();
 
-	std::cout << "All tests passed\n";
+	//std::cout << "All tests passed\n";
 
-	AVX256<double> x{ {1, 2, 3, 4} };
-	AVX256<double> y{ {4, 3, 2, 1} };
-	std::cout << static_cast<AVX256<double>>();
+	AVX256<uint64_t> x{ {1, 2, 3, 4} };
+	std::cout << AVX256<uint64_t>{x << 1};
 
 	return 0;
 }
