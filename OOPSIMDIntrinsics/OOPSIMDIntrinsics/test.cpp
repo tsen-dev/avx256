@@ -739,8 +739,7 @@ void runTests()
 	testAVX256IsGreaterThan();
 	testAVX256IsLessThan();
 	testAVX256Sum();
-	testAVX256Average();
-	
+	testAVX256Average();	
 }
 
 int main()
@@ -751,8 +750,12 @@ int main()
 
 	AVX256<uint64_t> x{ {1, 2, 3, 4} };
 	std::cout << AVX256<double>{AVX256<double>{(double*)(x.Data)} / AVX256<double>{(double*)(x.Data)}};
-	//std::cout << AVX256<uint64_t>{x << 1};
 
+
+	AVX256<uint8_t> avx{ {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31} };
+	AVX256<uint8_t> avxidx{ {15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0} };
+	_mm256_storeu_epi8(avx.Data, _mm256_shuffle_epi8(_mm256_loadu_epi8(avx.Data), _mm256_loadu_epi8(avxidx.Data)));
+	std::cout << avx;
 	return 0;
 }
 
