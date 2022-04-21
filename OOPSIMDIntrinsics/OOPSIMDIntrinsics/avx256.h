@@ -373,12 +373,12 @@ public:
 
 	AVX256& Negate()
 	{
-		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_andnot_pd(_mm256_loadu_pd(Data), _mm256_set1_pd(1)));
-		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_andnot_ps(_mm256_loadu_ps(Data), _mm256_set1_ps(1)));
-		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_andnot_si256(_mm256_loadu_epi64(Data), _mm256_set1_epi64x(1)));
-		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_andnot_si256(_mm256_loadu_epi32(Data), _mm256_set1_epi32(1)));
-		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_andnot_si256(_mm256_loadu_epi16(Data), _mm256_set1_epi16(1)));
-		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_andnot_si256(_mm256_loadu_epi8(Data), _mm256_set1_epi8(1)));
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_andnot_pd(_mm256_loadu_pd(Data), _mm256_castsi256_pd(_mm256_set1_epi64x(-1))));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_andnot_ps(_mm256_loadu_ps(Data), _mm256_castsi256_ps(_mm256_set1_epi32(-1))));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) _mm256_storeu_epi64(Data, _mm256_andnot_si256(_mm256_loadu_epi64(Data), _mm256_set1_epi64x(-1)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_andnot_si256(_mm256_loadu_epi32(Data), _mm256_set1_epi32(-1)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_andnot_si256(_mm256_loadu_epi16(Data), _mm256_set1_epi16(-1)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_andnot_si256(_mm256_loadu_epi8(Data), _mm256_set1_epi8(-1)));
 		return *this;
 	}
 
@@ -1011,32 +1011,58 @@ public:
 	}
 
 	// Computes the mean of corresponding elements, fractional results are rounded up to the nearest integer. This function is only available for 16 and 8-bit integers
-	AVX256& Average(const AVX256& operand) { return Average(operand.Data);}
+	AVX256& Average(const AVX256& operand) { return Average(operand.Data); }
 
 
 	// Permute ///////////
 
-	AVX256& Permute(const int order)
+	// Re-orders 64-bit elements using the specified order. Each argument specifies the index of the element that will be copied to that element, one element can be copied to many elements
+	template<int dst0, int dst1, int dst2, int dst3>
+	AVX256& Permute64()
 	{
-		if constexpr (std::is_same_v<T, double>) { _mm256_storeu_pd(Data, _mm256_permute4x64_pd(_mm256_loadu_pd(Data), order)); }
-		else if constexpr (std::is_same_v<T, uint64_t> || std::is_same_v<T, int64_t>) { _mm256_storeu_epi64(Data, _mm256_permute4x64_epi64(_mm256_loadu_epi64(Data), order)); }
-		else if constexpr (true) static_assert(false, "AVX256: Permute(int order) is only available for double and 64-bit integers");
+		static_assert(dst0 >= 0 && dst0 <= 3 && dst1 >= 0 && dst1 <= 3 && dst2 >= 0 && dst2 <= 3 && dst3 >= 0 && dst3 <= 3, "AVX256: Indices must be between 0 and 3 inclusive");
+		constexpr uint8_t ORDER = dst0 | (dst1 << 2) | (dst2 << 4) | (dst3 << 6);
+
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_permute4x64_pd(_mm256_loadu_pd(Data), ORDER));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_castpd_ps(_mm256_permute4x64_pd(_mm256_castps_pd(_mm256_loadu_ps(Data)), ORDER)));
+		else if constexpr (std::is_same_v<T, uint64_t> || std::is_same_v<T, int64_t>) _mm256_storeu_epi64(Data, _mm256_permute4x64_epi64(_mm256_loadu_epi64(Data), ORDER));
+		else if constexpr (std::is_same_v<T, uint32_t> || std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_permute4x64_epi64(_mm256_loadu_epi32(Data), ORDER));
+		else if constexpr (std::is_same_v<T, uint16_t> || std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_permute4x64_epi64(_mm256_loadu_epi16(Data), ORDER));
+		else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_permute4x64_epi64(_mm256_loadu_epi8(Data), ORDER));
+
 		return *this;
 	}
 
+	// Re-orders 32-bit the elements using the specified order. Each element in order specifies the index of the element that will be copied to that element, one element can be copied to many elements. Order indices should be between 0 and 7 inclusive
 	template <typename U>
-	AVX256& Permute(const U* order)
+	AVX256& Permute32(const U* order)
 	{
-		if constexpr (std::is_same_v<T, float>) { _mm256_storeu_ps(Data, _mm256_permutevar8x32_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(order))); }
-		else if constexpr (std::is_same_v<T, uint32_t> || std::is_same_v<T, int32_t>) { _mm256_storeu_epi32(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(order))); }
-		else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, int8_t>) { _mm256_storeu_epi8(Data, _mm256_permutevar8x8_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_ps(order))); }
-		else if constexpr (true) static_assert(false, "AVX256: Permute(order[]) is only available for float and 32-bit integers");
+		if constexpr (!std::is_same_v<U, uint32_t> && !std::is_same_v<U, int32_t>) static_assert(false, "AVX256: order must point to 32-bit integers");
+
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_permutevar8x32_pd(_mm256_loadu_pd(Data), _mm256_loadu_epi32(order)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_castpd_ps(_mm256_permutevar8x32_pd(_mm256_castps_pd_(mm256_loadu_ps(Data)), _mm256_loadu_epi32(order))));
+		else if constexpr (std::is_same_v<T, uint64_t> || std::is_same_v<T, int64_t>) _mm256_storeu_epi64(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi64(Data), _mm256_loadu_epi32(order)));
+		else if constexpr (std::is_same_v<T, uint32_t> || std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(order)));
+		else if constexpr (std::is_same_v<T, uint16_t> || std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi16(Data), _mm256_loadu_epi32(order)));
+		else if constexpr (std::is_same_v<T, uint8_t> || std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi8(Data), _mm256_loadu_epi32(order)));
 		return *this;
 	}
 
-	AVX256& Permute(const std::array<T, 32 / sizeof(T)>& order) { return Permute(order.data()); }
+	// Re-orders 32-bit the elements using the specified order. Each element in order specifies the index of the element that will be copied to that element, one element can be copied to many elements. Order indices should be between 0 and 7 inclusive
+	template <typename U>
+	AVX256& Permute32(const std::array<U, 32 / sizeof(U)>& order)
+	{
+		if constexpr (!std::is_same_v<U, uint32_t> && !std::is_same_v<U, int32_t>) static_assert(false, "AVX256: order must be an array of 32-bit integers");
+		else if constexpr (true) return Permute32(order.data());
+	}
 
-	AVX256& Permute(const AVX256& order) { return Permute(order.Data); }
+	// Re-orders 32-bit the elements using the specified order. Each element in order specifies the index of the element that will be copied to that element, one element can be copied to many elements. Order indices should be between 0 and 7 inclusive
+	template <typename U>
+	AVX256& Permute32(const AVX256<U>& order)
+	{
+		if constexpr (!std::is_same_v<U, uint32_t> && !std::is_same_v<U, int32_t>) static_assert(false, "AVX256: order must be an AVX256<uint32_t> or AVX256<int32_t>");
+		else if constexpr (true) return Permute32(order.Data);
+	}
 
 
 	friend void testAVX256Constructor();

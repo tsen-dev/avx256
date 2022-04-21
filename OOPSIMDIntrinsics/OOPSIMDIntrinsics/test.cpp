@@ -479,13 +479,13 @@ void testAVX256Clear()
 void testAVX256Negate()
 {
 	AVX256<uint64_t> avxULongs{ {UINT64_MAX, UINT64_MAX, UINT64_MAX, UINT64_MAX} };
-	AVX256<double> avxDoubles{ {std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max(), std::numeric_limits<double>::max()} };
+	AVX256<uint64_t> avxULongs1{ {UINT32_MAX, UINT32_MAX, UINT32_MAX, UINT32_MAX} };
 
 	avxULongs.Negate();
-	avxDoubles.Negate();
+	avxULongs1.Negate();
 
 	assert(std::all_of(avxULongs.Data, avxULongs.Data + 4, [](uint64_t element) {return element == 0; }));
-	assert(std::all_of(avxDoubles.Data, avxDoubles.Data + 4, [](double element) {return element == std::numeric_limits<double>::min(); }));
+	assert(std::all_of(avxULongs1.Data, avxULongs1.Data + 4, [](uint64_t element) {return element == UINT64_MAX - UINT32_MAX; }));
 }
 
 void testAVX256And()
@@ -714,6 +714,21 @@ void testAVX256Average()
 	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
 }
 
+void testAVX256Permute()
+{
+	AVX256<double> avxDoubles{ {0, 1, 2, 3} };
+	AVX256<uint64_t> avxULongs{ {0, 1, 2, 3} };
+	AVX256<float> avxFloats{ {0, 1, 2, 3, 4, 5, 6, 7} };	
+
+	avxDoubles.Permute64<3, 2, 1, 0>();
+	avxULongs.Permute64<3, 2, 1, 0>();
+	avxFloats.Permute64<3, 2, 1, 0>();
+
+	assert(AVX256<double>{avxDoubles.IsEqualTo({ 3, 2, 1, 0 })}.Negate().IsZero());
+	assert(AVX256<uint64_t>{avxULongs.IsEqualTo({ 3, 2, 1, 0 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ 8, 8, 8, 8, 8, 8, 8, 8 })}.Negate().IsZero());
+}
+
 void runTests()
 {
 	testHasCPUIDSupport();
@@ -740,6 +755,7 @@ void runTests()
 	testAVX256IsLessThan();
 	testAVX256Sum();
 	testAVX256Average();	
+	testAVX256Permute();
 }
 
 int main()
@@ -748,14 +764,6 @@ int main()
 
 	std::cout << "All tests passed\n";
 
-	AVX256<uint64_t> x{ {1, 2, 3, 4} };
-	std::cout << AVX256<double>{AVX256<double>{(double*)(x.Data)} / AVX256<double>{(double*)(x.Data)}};
-
-
-	AVX256<uint8_t> avx{ {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31} };
-	AVX256<uint8_t> avxidx{ {15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0} };
-	_mm256_storeu_epi8(avx.Data, _mm256_shuffle_epi8(_mm256_loadu_epi8(avx.Data), _mm256_loadu_epi8(avxidx.Data)));
-	std::cout << avx;
 	return 0;
 }
 
