@@ -1039,8 +1039,8 @@ public:
 	{
 		if constexpr (!std::is_same_v<U, uint32_t> && !std::is_same_v<U, int32_t>) static_assert(false, "AVX256: order must point to 32-bit integers");
 
-		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_permutevar8x32_pd(_mm256_loadu_pd(Data), _mm256_loadu_epi32(order)));
-		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_castpd_ps(_mm256_permutevar8x32_pd(_mm256_castps_pd_(mm256_loadu_ps(Data)), _mm256_loadu_epi32(order))));
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_castps_pd(_mm256_permutevar8x32_ps(_mm256_castpd_ps(_mm256_loadu_pd(Data)), _mm256_loadu_epi32(order))));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_permutevar8x32_ps(_mm256_loadu_ps(Data), _mm256_loadu_epi32(order)));
 		else if constexpr (std::is_same_v<T, uint64_t> || std::is_same_v<T, int64_t>) _mm256_storeu_epi64(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi64(Data), _mm256_loadu_epi32(order)));
 		else if constexpr (std::is_same_v<T, uint32_t> || std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(order)));
 		else if constexpr (std::is_same_v<T, uint16_t> || std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_permutevar8x32_epi32(_mm256_loadu_epi16(Data), _mm256_loadu_epi32(order)));

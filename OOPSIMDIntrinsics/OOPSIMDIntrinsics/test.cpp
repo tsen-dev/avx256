@@ -718,15 +718,33 @@ void testAVX256Permute()
 {
 	AVX256<double> avxDoubles{ {0, 1, 2, 3} };
 	AVX256<uint64_t> avxULongs{ {0, 1, 2, 3} };
-	AVX256<float> avxFloats{ {0, 1, 2, 3, 4, 5, 6, 7} };	
+	AVX256<float> avxFloats{ {0, 1, 2, 3, 4, 5, 6, 7} };
+	AVX256<uint32_t> avxUInts{ {0, 1, 2, 3, 4, 5, 6, 7} };
 
 	avxDoubles.Permute64<3, 2, 1, 0>();
 	avxULongs.Permute64<3, 2, 1, 0>();
 	avxFloats.Permute64<3, 2, 1, 0>();
+	avxUInts.Permute64<3, 2, 1, 0>();
 
 	assert(AVX256<double>{avxDoubles.IsEqualTo({ 3, 2, 1, 0 })}.Negate().IsZero());
 	assert(AVX256<uint64_t>{avxULongs.IsEqualTo({ 3, 2, 1, 0 })}.Negate().IsZero());
-	assert(AVX256<float>{avxFloats.IsEqualTo({ 8, 8, 8, 8, 8, 8, 8, 8 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ 6, 7, 4, 5, 2, 3, 0, 1 })}.Negate().IsZero());
+	assert(AVX256<uint32_t>{avxUInts.IsEqualTo({ 6, 7, 4, 5, 2, 3, 0, 1 })}.Negate().IsZero());
+
+	AVX256<double> avxDoubles1{ {0, 1, 2, 3} };
+	AVX256<uint64_t> avxULongs1{ {0, 1, 2, 3} };
+	AVX256<float> avxFloats1{ {0, 1, 2, 3, 4, 5, 6, 7} };
+	AVX256<uint32_t> avxUInts1{ {0, 1, 2, 3, 4, 5, 6, 7} };
+
+	avxDoubles1.Permute32(std::array<int32_t, 8>{ 6, 7, 4, 5, 2, 3, 0, 1 });
+	avxULongs1.Permute32(std::array<int32_t, 8>{ 6, 7, 4, 5, 2, 3, 0, 1 });
+	avxFloats1.Permute32(std::array<int32_t, 8>{ 7, 6, 5, 4, 3, 2, 1, 0 });
+	avxUInts1.Permute32(std::array<int32_t, 8>{ 7, 6, 5, 4, 3, 2, 1, 0 });
+
+	assert(AVX256<double>{avxDoubles1.IsEqualTo({ 3, 2, 1, 0 })}.Negate().IsZero());
+	assert(AVX256<uint64_t>{avxULongs1.IsEqualTo({ 3, 2, 1, 0 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats1.IsEqualTo({ 7, 6, 5, 4, 3, 2, 1, 0 })}.Negate().IsZero());
+	assert(AVX256<uint32_t>{avxUInts1.IsEqualTo({ 7, 6, 5, 4, 3, 2, 1, 0 })}.Negate().IsZero());
 }
 
 void runTests()
