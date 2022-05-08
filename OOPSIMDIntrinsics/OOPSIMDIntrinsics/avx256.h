@@ -870,6 +870,30 @@ public:
 	AVX256& Max(const AVX256& operand) { return Max(operand.Data); }
 
 
+	// Floor ///////////
+
+	// This function is only available for floating point types
+	AVX256& Floor()
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_floor_pd(_mm256_loadu_pd(Data)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_floor_ps(_mm256_loadu_ps(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: Floor() is only available for floating point types");
+		return *this;
+	}
+
+
+	// Ceil ///////////
+
+	// This function is only available for floating point types
+	AVX256& Ceil()
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_ceil_pd(_mm256_loadu_pd(Data)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_ceil_ps(_mm256_loadu_ps(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: Ceil() is only available for floating point types");
+		return *this;
+	}
+
+
 	// Sum ///////////
 
 	// Returns the sum of all packed elements. The result is returned in full precision except with 32-bit integers, whose sum is accumulated into 32-bits and hence can overflow. This function is not available for 64-bit integers.

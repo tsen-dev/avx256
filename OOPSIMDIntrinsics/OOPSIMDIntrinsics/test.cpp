@@ -698,6 +698,23 @@ void testAVX256Max()
 	assert(AVX256<int8_t>{avxChars1.Max(avxChars2).IsEqualTo({ -4, -3, -2, 1, 1, 2, 3, static_cast<int8_t>(1 << 6) })}.Negate().IsZero());
 }
 
+void testAVX256Floor()
+{
+	AVX256<double> avxDoubles{ {-2.5, -1.5, 1.5, 2.5} };
+	AVX256<float> avxFloats{ {-2.5, -1.5, 1.5, 2.5, -2.5, -1.5, 1.5, 2.5} };
+
+	avxDoubles.Floor();
+	avxFloats.Floor();
+
+	assert(AVX256<double>{avxDoubles.IsEqualTo({-3, -2, 1, 2})}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ -3, -2, 1, 2, -3, -2, 1, 2 })}.Negate().IsZero());
+}
+
+void testAVX256Ceil()
+{
+
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -878,6 +895,8 @@ void runTests()
 	testAVX256Absolute();
 	testAVX256Min();
 	testAVX256Max();
+	testAVX256Floor();
+	testAVX256Ceil();
 	testAVX256Sum();
 	testAVX256Average();
 	testAVX256Inverse();
