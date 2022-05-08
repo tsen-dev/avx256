@@ -725,6 +725,18 @@ void testAVX256Sqrt()
 	assert(AVX256<float>{avxFloats.IsEqualTo({ NAN, 0, 2, 3, NAN, 0, 2, 3 })}.Negate().IsZero());
 }
 
+void testAVX256InverseSqrt()
+{
+	AVX256<float> avxFloats{ { 0, 1, 0.25, 0.0625, 0, 1, 0.25, 0.0625 } };
+
+	avxFloats.InverseSqrt();
+
+	assert(avxFloats[0] == INFINITY && avxFloats[4] == INFINITY);
+	assert(std::abs(avxFloats[1] - 1) < 0.001f && std::abs(avxFloats[5] - 1) < 0.001f);
+	assert(std::abs(avxFloats[2] - 2) < 0.001f && std::abs(avxFloats[6] - 2) < 0.001f);
+	assert(std::abs(avxFloats[3] - 4) < 0.001f && std::abs(avxFloats[7] - 4) < 0.001f);
+}
+
 void testAVX256Permute()
 {
 	AVX256<double> avxDoubles{ {0, 1, 2, 3} };
@@ -797,6 +809,7 @@ void runTests()
 	testAVX256Sum();
 	testAVX256Average();
 	testAVX256Sqrt();
+	testAVX256InverseSqrt();
 	testAVX256Permute();
 }
 

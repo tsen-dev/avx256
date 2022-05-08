@@ -1009,6 +1009,17 @@ public:
 	}
 
 
+	// InverseSqrt ///////////
+
+	// Computes an approximation of the inverse square root of each element (max relative error < 1.5*2^-12). This function is only available for 32-bit floating point types
+	AVX256& InverseSqrt()
+	{
+		if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_rsqrt_ps(_mm256_loadu_ps(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: InverseSqrt() is only available for 32-bit floating point types");
+		return *this;
+	}
+
+
 	// Permute ///////////
 
 	// Re-orders 64-bit elements using the specified order. Each argument specifies the index of the element that will be copied to that element, one element can be copied to many elements
