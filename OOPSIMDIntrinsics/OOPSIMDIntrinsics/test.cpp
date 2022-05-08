@@ -712,7 +712,14 @@ void testAVX256Floor()
 
 void testAVX256Ceil()
 {
+	AVX256<double> avxDoubles{ {-2.5, -1.5, 1.5, 2.5} };
+	AVX256<float> avxFloats{ {-2.5, -1.5, 1.5, 2.5, -2.5, -1.5, 1.5, 2.5} };
 
+	avxDoubles.Ceil();
+	avxFloats.Ceil();
+
+	assert(AVX256<double>{avxDoubles.IsEqualTo({ -2, -1, 2, 3 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ -2, -1, 2, 3, -2, -1, 2, 3 })}.Negate().IsZero());
 }
 
 void testAVX256Sum()
