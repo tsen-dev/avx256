@@ -700,26 +700,26 @@ void testAVX256Max()
 
 void testAVX256Floor()
 {
-	AVX256<double> avxDoubles{ {-2.5, -1.5, 1.5, 2.5} };
-	AVX256<float> avxFloats{ {-2.5, -1.5, 1.5, 2.5, -2.5, -1.5, 1.5, 2.5} };
+	AVX256<double> avxDoubles{ {-2.5, -1.5, 1.5, 0} };
+	AVX256<float> avxFloats{ {-2.5, -1.5, 1.5, 0, -2.5, -1.5, 1.5, 0} };
 
 	avxDoubles.Floor();
 	avxFloats.Floor();
 
-	assert(AVX256<double>{avxDoubles.IsEqualTo({-3, -2, 1, 2})}.Negate().IsZero());
-	assert(AVX256<float>{avxFloats.IsEqualTo({ -3, -2, 1, 2, -3, -2, 1, 2 })}.Negate().IsZero());
+	assert(AVX256<double>{avxDoubles.IsEqualTo({-3, -2, 1, 0})}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ -3, -2, 1, 0, -3, -2, 1, 0 })}.Negate().IsZero());
 }
 
 void testAVX256Ceil()
 {
-	AVX256<double> avxDoubles{ {-2.5, -1.5, 1.5, 2.5} };
-	AVX256<float> avxFloats{ {-2.5, -1.5, 1.5, 2.5, -2.5, -1.5, 1.5, 2.5} };
+	AVX256<double> avxDoubles{ {-2.5, -1.5, 1.5, 0} };
+	AVX256<float> avxFloats{ {-2.5, -1.5, 1.5, 0, -2.5, -1.5, 1.5, 0} };
 
 	avxDoubles.Ceil();
 	avxFloats.Ceil();
 
-	assert(AVX256<double>{avxDoubles.IsEqualTo({ -2, -1, 2, 3 })}.Negate().IsZero());
-	assert(AVX256<float>{avxFloats.IsEqualTo({ -2, -1, 2, 3, -2, -1, 2, 3 })}.Negate().IsZero());
+	assert(AVX256<double>{avxDoubles.IsEqualTo({ -2, -1, 2, 0 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ -2, -1, 2, 0, -2, -1, 2, 0 })}.Negate().IsZero());
 }
 
 void testAVX256Sum()
