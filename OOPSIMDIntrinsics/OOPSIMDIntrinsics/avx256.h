@@ -997,6 +997,17 @@ public:
 	AVX256& Average(const AVX256& operand) { return Average(operand.Data); }
 
 
+	// Inverse ///////////
+
+	// Computes an approximation of the inverse (i.e. reciprocal) of each element (max relative error < 1.5*2^-12). This function is only available for 32-bit floating point types
+	AVX256& Inverse()
+	{
+		if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_rcp_ps(_mm256_loadu_ps(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: Inverse() is only available for 32-bit floating point types");
+		return *this;
+	}
+
+
 	// Sqrt ///////////
 
 	// This function is only available for floating point types

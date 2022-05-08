@@ -713,6 +713,18 @@ void testAVX256Average()
 	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
 }
 
+void testAVX256Inverse()
+{
+	AVX256<float> avxFloats{ { -0, -1, -0.25, -0.0625, 0, 1, 0.25, 0.0625 } };
+
+	avxFloats.Inverse();
+
+	assert(avxFloats[0] == INFINITY && avxFloats[4] == INFINITY);
+	assert(std::abs(avxFloats[1] - -1) < 0.01f && std::abs(avxFloats[5] - 1) < 0.01f);
+	assert(std::abs(avxFloats[2] - -4) < 0.01f && std::abs(avxFloats[6] - 4) < 0.01f);
+	assert(std::abs(avxFloats[3] - -16) < 0.01f && std::abs(avxFloats[7] - 16) < 0.01f);
+}
+
 void testAVX256Sqrt()
 {
 	AVX256<double> avxDoubles{ {-1, 0, 4, 9} };
@@ -808,6 +820,7 @@ void runTests()
 	testAVX256IsLessThan();
 	testAVX256Sum();
 	testAVX256Average();
+	testAVX256Inverse();
 	testAVX256Sqrt();
 	testAVX256InverseSqrt();
 	testAVX256Permute();
