@@ -661,11 +661,11 @@ void testAVX256Min()
 	AVX256<double> avxDoubles1{ {0, 1, 2, 3} }, avxDoubles2{ {-1, 0, 3, 4} };
 	AVX256<float> avxFloats1{ {0, 1, 2, 3, 0, 1, 2, 3} }, avxFloats2{ {-1, 0, 3, 4, -1, 0, 3, 4} };
 	AVX256<uint32_t> avxUInts1{ {1, 2, 3, 4, 5, 6, 7, static_cast<uint32_t>(1 << 31)} }, avxUInts2{ {0, 1, 2, 3, 6, 7, 8, static_cast<uint32_t>(1 << 30)} };
-	AVX256<int32_t> avxInts1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int32_t>(1 << 31)} }, avxInts2{ {-5, -4, -3, 1, 2, 3, static_cast<int32_t>(1 << 30)} };
+	AVX256<int32_t> avxInts1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int32_t>(1 << 31)} }, avxInts2{ {-5, -4, -3, 1, 1, 2, 3, static_cast<int32_t>(1 << 30)} };
 	AVX256<uint16_t> avxUShorts1{ {1, 2, 3, 4, 5, 6, 7, static_cast<uint16_t>(1 << 15)} }, avxUShorts2{ {0, 1, 2, 3, 6, 7, 8, static_cast<uint16_t>(1 << 14)} };
-	AVX256<int16_t> avxShorts1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int16_t>(1 << 15)} }, avxShorts2{ {-5, -4, -3, 1, 2, 3, static_cast<int16_t>(1 << 14)} };
+	AVX256<int16_t> avxShorts1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int16_t>(1 << 15)} }, avxShorts2{ {-5, -4, -3, 1, 1, 2, 3, static_cast<int16_t>(1 << 14)} };
 	AVX256<uint8_t> avxUChars1{ {1, 2, 3, 4, 5, 6, 7, static_cast<uint8_t>(1 << 7)} }, avxUChars2{ {0, 1, 2, 3, 6, 7, 8, static_cast<uint8_t>(1 << 6)} };
-	AVX256<int8_t> avxChars1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int8_t>(1 << 7)} }, avxChars2{ {-5, -4, -3, 1, 2, 3, static_cast<int8_t>(1 << 6)} };
+	AVX256<int8_t> avxChars1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int8_t>(1 << 7)} }, avxChars2{ {-5, -4, -3, 1, 1, 2, 3, static_cast<int8_t>(1 << 6)} };
 
 	assert(AVX256<double>{avxDoubles1.Min(avxDoubles2).IsEqualTo({ -1, 0, 2, 3 })}.Negate().IsZero());
 	assert(AVX256<float>{avxFloats1.Min(avxFloats2).IsEqualTo({ -1, 0, 2, 3, -1, 0, 2, 3 })}.Negate().IsZero());
@@ -679,7 +679,23 @@ void testAVX256Min()
 
 void testAVX256Max()
 {
+	AVX256<double> avxDoubles1{ {0, 1, 2, 3} }, avxDoubles2{ {-1, 0, 3, 4} };
+	AVX256<float> avxFloats1{ {0, 1, 2, 3, 0, 1, 2, 3} }, avxFloats2{ {-1, 0, 3, 4, -1, 0, 3, 4} };
+	AVX256<uint32_t> avxUInts1{ {1, 2, 3, 4, 5, 6, 7, static_cast<uint32_t>(1 << 31)} }, avxUInts2{ {0, 1, 2, 3, 6, 7, 8, static_cast<uint32_t>(1 << 30)} };
+	AVX256<int32_t> avxInts1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int32_t>(1 << 31)} }, avxInts2{ {-5, -4, -3, 1, 1, 2, 3, static_cast<int32_t>(1 << 30)} };
+	AVX256<uint16_t> avxUShorts1{ {1, 2, 3, 4, 5, 6, 7, static_cast<uint16_t>(1 << 15)} }, avxUShorts2{ {0, 1, 2, 3, 6, 7, 8, static_cast<uint16_t>(1 << 14)} };
+	AVX256<int16_t> avxShorts1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int16_t>(1 << 15)} }, avxShorts2{ {-5, -4, -3, 1, 1, 2, 3, static_cast<int16_t>(1 << 14)} };
+	AVX256<uint8_t> avxUChars1{ {1, 2, 3, 4, 5, 6, 7, static_cast<uint8_t>(1 << 7)} }, avxUChars2{ {0, 1, 2, 3, 6, 7, 8, static_cast<uint8_t>(1 << 6)} };
+	AVX256<int8_t> avxChars1{ {-4, -3, -2, -1, 0, 1, 2, static_cast<int8_t>(1 << 7)} }, avxChars2{ {-5, -4, -3, 1, 1, 2, 3, static_cast<int8_t>(1 << 6)} };
 
+	assert(AVX256<double>{avxDoubles1.Max(avxDoubles2).IsEqualTo({ 0, 1, 3, 4 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats1.Max(avxFloats2).IsEqualTo({ 0, 1, 3, 4, 0, 1, 3, 4 })}.Negate().IsZero());
+	assert(AVX256<uint32_t>{avxUInts1.Max(avxUInts2).IsEqualTo({ 1, 2, 3, 4, 6, 7, 8, static_cast<uint32_t>(1 << 31) })}.Negate().IsZero());
+	assert(AVX256<int32_t>{avxInts1.Max(avxInts2).IsEqualTo({ -4, -3, -2, 1, 1, 2, 3, static_cast<int32_t>(1 << 30) })}.Negate().IsZero());
+	assert(AVX256<uint16_t>{avxUShorts1.Max(avxUShorts2).IsEqualTo({ 1, 2, 3, 4, 6, 7, 8, static_cast<uint16_t>(1 << 15) })}.Negate().IsZero());
+	assert(AVX256<int16_t>{avxShorts1.Max(avxShorts2).IsEqualTo({ -4, -3, -2, 1, 1, 2, 3, static_cast<int16_t>(1 << 14) })}.Negate().IsZero());
+	assert(AVX256<uint8_t>{avxUChars1.Max(avxUChars2).IsEqualTo({ 1, 2, 3, 4, 6, 7, 8, static_cast<uint8_t>(1 << 7) })}.Negate().IsZero());
+	assert(AVX256<int8_t>{avxChars1.Max(avxChars2).IsEqualTo({ -4, -3, -2, 1, 1, 2, 3, static_cast<int8_t>(1 << 6) })}.Negate().IsZero());
 }
 
 void testAVX256Sum()
