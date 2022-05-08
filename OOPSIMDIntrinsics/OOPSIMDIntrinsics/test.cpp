@@ -641,6 +641,21 @@ void testAVX256IsLessThan()
 	assert(avxLongMask01.Negate().IsZero() && avxLongMask10.IsZero() && avxLongMask02.IsZero());
 }
 
+void testAVX256Absolute()
+{
+	AVX256<int32_t> avxInts{ {-4, -3, -2, -1, 0, 1, 2, 3} };
+	AVX256<int16_t> avxShorts{ {-4, -3, -2, -1, 0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3} };
+	AVX256<int8_t> avxChars{ {-4, -3, -2, -1, 0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3} };
+
+	avxInts.Absolute();
+	avxShorts.Absolute();
+	avxChars.Absolute();	
+
+	assert(AVX256<int32_t>{avxInts.IsEqualTo({ 4, 3, 2, 1, 0, 1, 2, 3 })}.Negate().IsZero());
+	assert(AVX256<int16_t>{avxShorts.IsEqualTo({ 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3 })}.Negate().IsZero());
+	assert(AVX256<int8_t>{avxChars.IsEqualTo({ 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3 })}.Negate().IsZero());
+}
+
 void testAVX256Sum()
 {
 	AVX256<uint8_t> avxUChars0{ { UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX,
@@ -818,6 +833,7 @@ void runTests()
 	testAVX256IsEqualTo();
 	testAVX256IsGreaterThan();
 	testAVX256IsLessThan();
+	testAVX256Absolute();
 	testAVX256Sum();
 	testAVX256Average();
 	testAVX256Inverse();

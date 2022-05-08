@@ -815,6 +815,24 @@ public:
 	std::array<T, 32 / sizeof(T)> operator<(const AVX256& values) { return IsLessThan(values.Data); }
 
 
+	// Absolute ///////////
+
+	// This function is only available for 32, 16, and 8-bit signed integers
+	AVX256& Absolute()
+	{
+		if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_abs_epi32(_mm256_loadu_epi32(Data)));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_abs_epi16(_mm256_loadu_epi16(Data)));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_abs_epi8(_mm256_loadu_epi8(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: Absolute() is only available for 32, 16, and 8-bit signed integers");
+		return *this;
+	}
+
+	// Min ///////////
+
+
+	// Max ///////////
+
+
 	// Sum ///////////
 
 	// Returns the sum of all packed elements. The result is returned in full precision except with 32-bit integers, whose sum is accumulated into 32-bits and hence can overflow. This function is not available for 64-bit integers.
