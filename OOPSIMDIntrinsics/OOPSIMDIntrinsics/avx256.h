@@ -997,6 +997,18 @@ public:
 	AVX256& Average(const AVX256& operand) { return Average(operand.Data); }
 
 
+	// Sqrt ///////////
+
+	// This function is only available for floating point types
+	AVX256& Sqrt()
+	{
+		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_sqrt_pd(_mm256_loadu_pd(Data)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_sqrt_ps(_mm256_loadu_ps(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: Sqrt() is only available for floating point types");
+		return *this;
+	}
+
+
 	// Permute ///////////
 
 	// Re-orders 64-bit elements using the specified order. Each argument specifies the index of the element that will be copied to that element, one element can be copied to many elements

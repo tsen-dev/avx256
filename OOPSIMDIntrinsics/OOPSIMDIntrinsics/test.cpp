@@ -702,7 +702,6 @@ void testAVX256Average()
 	AVX256<uint8_t> avxUChars{ myUChars0 };
 	AVX256<int8_t> avxChars{ myChars0 };
 	
-
 	avxUShorts.Average(myUShorts1);
 	avxShorts.Average(myShorts1);
 	avxUChars.Average(myUChars1);
@@ -712,6 +711,18 @@ void testAVX256Average()
 	assert(std::equal(std::begin(myShorts0), std::end(myShorts0), myShortsResults));
 	assert(std::equal(std::begin(myUChars0), std::end(myUChars0), myUCharsResults));
 	assert(std::equal(std::begin(myChars0), std::end(myChars0), myCharsResults));
+}
+
+void testAVX256Sqrt()
+{
+	AVX256<double> avxDoubles{ {-1, 0, 4, 9} };
+	AVX256<float> avxFloats{ { -1, 0, 4, 9, -1, 0, 4, 9 } };
+
+	avxDoubles.Sqrt();
+	avxFloats.Sqrt();
+
+	assert(AVX256<double>{avxDoubles.IsEqualTo({ NAN, 0, 2, 3 })}.Negate().IsZero());
+	assert(AVX256<float>{avxFloats.IsEqualTo({ NAN, 0, 2, 3, NAN, 0, 2, 3 })}.Negate().IsZero());
 }
 
 void testAVX256Permute()
@@ -784,7 +795,8 @@ void runTests()
 	testAVX256IsGreaterThan();
 	testAVX256IsLessThan();
 	testAVX256Sum();
-	testAVX256Average();	
+	testAVX256Average();
+	testAVX256Sqrt();
 	testAVX256Permute();
 }
 
