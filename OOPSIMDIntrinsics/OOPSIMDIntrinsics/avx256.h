@@ -827,10 +827,47 @@ public:
 		return *this;
 	}
 
+
 	// Min ///////////
+
+	// This function is not available for 64-bit integers
+	AVX256& Min(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>)  _mm256_storeu_pd(Data, _mm256_min_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_min_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_min_epu32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_min_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_min_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_min_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_min_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_min_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		return *this;
+	}
+
+	AVX256& Min(const std::array<T, 32 / sizeof(T)>& operand) { return Min(operand.data()); }
+
+	AVX256& Min(const AVX256& operand) { return Min(operand.Data); }
 
 
 	// Max ///////////
+
+	// This function is not available for 64-bit integers
+	AVX256& Max(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>)  _mm256_storeu_pd(Data, _mm256_max_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(operand)));
+		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_max_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(operand)));
+		else if constexpr (std::is_same_v<T, uint32_t>) _mm256_storeu_epi32(Data, _mm256_max_epu32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, int32_t>) _mm256_storeu_epi32(Data, _mm256_max_epi32(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(operand)));
+		else if constexpr (std::is_same_v<T, uint16_t>) _mm256_storeu_epi16(Data, _mm256_max_epu16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, int16_t>) _mm256_storeu_epi16(Data, _mm256_max_epi16(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(operand)));
+		else if constexpr (std::is_same_v<T, uint8_t>) _mm256_storeu_epi8(Data, _mm256_max_epu8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		else if constexpr (std::is_same_v<T, int8_t>) _mm256_storeu_epi8(Data, _mm256_max_epi8(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(operand)));
+		return *this;
+	}
+
+	AVX256& Max(const std::array<T, 32 / sizeof(T)>& operand) { return Max(operand.data()); }
+
+	AVX256& Max(const AVX256& operand) { return Max(operand.Data); }
 
 
 	// Sum ///////////
