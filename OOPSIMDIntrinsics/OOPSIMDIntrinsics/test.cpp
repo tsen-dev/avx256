@@ -910,13 +910,13 @@ void runTests()
 	testAVX256Sqrt();
 	testAVX256InverseSqrt();
 	testAVX256Permute();
+
+	assert(std::cout << "All tests passed\n"); // Only display this when in debug build i.e. when assertions are enabled
 }
 
 int main()
 {
 	runTests();
-
-	std::cout << "All tests passed\n";
 
 	return 0;
 }
