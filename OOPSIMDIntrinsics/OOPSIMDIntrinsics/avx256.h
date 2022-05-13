@@ -67,15 +67,17 @@ public:
 		return *this;
 	}
 
-	AVX256& AddSatuate(const std::array<T, 32 / sizeof(T)>& operand) { return AddSatuate(operand.data()); }
+	AVX256& AddSaturate(const std::array<T, 32 / sizeof(T)>& operand) { return AddSaturate(operand.data()); }
 
-	AVX256& AddSaturate(const AVX256& operand) { return AddSatuate(operand.Data);}
+	AVX256& AddSaturate(const AVX256& operand) { return AddSaturate(operand.Data);}
 
 	// Performs saturation arithmetic on 16 and 8-bit integers, wraparound arithmetic otherwise
 	AVX256& operator+=(const T* operand) 
 	{ 
 		if constexpr (sizeof(T) > 2) return Add(operand);
-		else if constexpr (sizeof(T) <= 2) return AddSatuate(operand);
+		else if constexpr (std::is_same_v<T, uint16_t>) return AddSaturate(operand);
+		else if constexpr (std::is_same_v<T, int16_t>) return AddSaturate(static_cast<const T*>(operand));
+		else if constexpr (sizeof(T) <= 2) return AddSaturate(operand);
 	}
 
 	// Performs saturation arithmetic on 16 and 8-bit integers, wraparound arithmetic otherwise. 
@@ -132,15 +134,15 @@ public:
 		return *this;
 	}
 
-	AVX256& SubSatuate(const std::array<T, 32 / sizeof(T)>& operand) { return SubSatuate(operand.data()); }
+	AVX256& SubSaturate(const std::array<T, 32 / sizeof(T)>& operand) { return SubSaturate(operand.data()); }
 
-	AVX256& SubSatuate(const AVX256& operand) { return SubSatuate(operand.Data); }
+	AVX256& SubSaturate(const AVX256& operand) { return SubSaturate(operand.Data); }
 
 	// Performs saturation arithmetic on 16 and 8-bit integers, wraparound arithmetic otherwise
 	AVX256& operator-=(const T* operand)
 	{
 		if constexpr (sizeof(T) > 2) return Sub(operand);
-		else if constexpr (sizeof(T) <= 2) return SubSatuate(operand);
+		else if constexpr (sizeof(T) <= 2) return SubSaturate(operand);
 	}
 
 	// Performs saturation arithmetic on 16 and 8-bit integers, wraparound arithmetic otherwise. 
