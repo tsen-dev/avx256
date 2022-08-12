@@ -1011,16 +1011,16 @@ public:
 		}
 		else if constexpr (std::is_same_v<T, double>)
 		{
-		return _mm256_hadd_pd( // = |0|0|0|s1+s0|
-					_mm256_permute4x64_pd( // = |0|0|s1|s0|
-						_mm256_hadd_pd( // = |0|s1|0|s0| (64-bit packing)
-							_mm256_loadu_pd(Data),
-							_mm256_setzero_pd()
+			return _mm256_hadd_pd( // = |0|0|0|s1+s0|
+						_mm256_permute4x64_pd( // = |0|0|s1|s0|
+							_mm256_hadd_pd( // = |0|s1|0|s0| (64-bit packing)
+								_mm256_loadu_pd(Data),
+								_mm256_setzero_pd()
+							),
+							0b01011000
 						),
-						0b01011000
-					),
-					_mm256_setzero_pd()			
-			).m256d_f64[0];
+						_mm256_setzero_pd()			
+				).m256d_f64[0];
 		}
 	}
 
