@@ -7,6 +7,7 @@
 #include <opencv2/imgproc.hpp>
 
 #include "test.h"
+#include "avx256.h"
 #include "add_demo.h"
 #include "threshold_demo.h"
 
@@ -62,8 +63,13 @@ void writeFPS(cv::Mat& image, int frameCount, const std::vector<std::vector<int>
 
 int main(void)
 {
-	addDemo("C:/Users/Toprak/Desktop/1.mp4", "C:/Users/Toprak/Desktop/2.mp4");
-	thresholdDemo("C:/Users/Toprak/Desktop/1.mp4");
+	if (AVX256Utils::HasAVX2Support())
+	{
+		addDemo("C:/Users/Toprak/Desktop/1.mp4", "C:/Users/Toprak/Desktop/2.mp4");
+		thresholdDemo("C:/Users/Toprak/Desktop/1.mp4");
+	}
+
+	else std::cerr << "Error: Your CPU does not support the AVX2 instruction set!";
 
 	return 0;
 }
