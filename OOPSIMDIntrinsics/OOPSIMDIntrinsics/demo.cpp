@@ -6,10 +6,10 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "test.h"
 #include "avx256.h"
 #include "add_demo.h"
 #include "threshold_demo.h"
+#include "abs_diff_demo.h"
 
 #ifndef TEST
 
@@ -32,7 +32,7 @@ cv::Mat createFPSPlot(const cv::Size& size, const std::pair<int, int>& axisMax, 
 	return plot;
 }
 
-// Plot the fps moving average at the current frame, for each addition method used
+// Plot the fps moving average at the current frame, for each method used
 void plotFPS(cv::Mat& plot, const std::pair<int, int>& axisMax, int frameCount, int avgRange, const std::vector<std::vector<int>>& fpss)
 {
 	int x = static_cast<int>(plot.cols * frameCount / static_cast<double>(axisMax.first));
@@ -51,7 +51,7 @@ void plotFPS(cv::Mat& plot, const std::pair<int, int>& axisMax, int frameCount, 
 	}
 }
 
-// Display the last fps metric for each addition method 
+// Display the last fps metric for each method 
 void writeFPS(cv::Mat& image, int frameCount, const std::vector<std::vector<int>>& fpss)
 {
 	cv::Scalar colours[3] = { CV_RGB(255, 0, 0), CV_RGB(0, 255, 0), CV_RGB(0, 255, 255) };
@@ -63,10 +63,13 @@ void writeFPS(cv::Mat& image, int frameCount, const std::vector<std::vector<int>
 
 int main(void)
 {
+	cv::setNumThreads(0);
+
 	if (AVX256Utils::HasAVX2Support())
 	{
 		addDemo("C:/Users/Toprak/Desktop/1.mp4", "C:/Users/Toprak/Desktop/2.mp4");
 		thresholdDemo("C:/Users/Toprak/Desktop/1.mp4");
+		absDiffDemo("C:/Users/Toprak/Desktop/3.mp4");
 	}
 
 	else std::cerr << "Error: Your CPU does not support the AVX2 instruction set!";

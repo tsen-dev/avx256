@@ -1,7 +1,6 @@
 #include <string>
 #include <chrono>
 #include <array>
-#include <iostream>
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -11,7 +10,7 @@
 #include "avx256.h"
 #include "demo.h"
 
-
+// Convert the image to a binary image using the specified boundary with cv::threshold() (simd)
 int thresholdOpenCVSIMD(cv::Mat& image, uint8_t boundary)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
@@ -23,6 +22,7 @@ int thresholdOpenCVSIMD(cv::Mat& image, uint8_t boundary)
 	return static_cast<int>(1 / std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(end - start).count());
 }
 
+// Convert the image to a binary image using the specified boundary with AVX256 operations
 int thresholdAVX256(cv::Mat& image, uint8_t boundary)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
@@ -31,29 +31,30 @@ int thresholdAVX256(cv::Mat& image, uint8_t boundary)
 	AVX256<uint8_t> avxBoundary{}; 
 	avxBoundary = boundary;
 
-	int64_t size = static_cast<uint64_t>(image.rows) * image.cols * image.channels();
-	int64_t count = size / 32;
+	uint64_t size = static_cast<uint64_t>(image.rows) * image.cols * image.channels();
+	uint64_t count = size / 32;
 	int residualCount = size % 32;
 
 	for (int i = 0; i < count; ++i, avxImage1.Next())
 		avxImage1 = avxImage1 > avxBoundary;
 
-	for (int64_t i = size - residualCount; i < size; ++i)
-		image.data[i] = image.data[i] > boundary ? UINT8_MAX : 0;
+	for (uint64_t i = size - residualCount; i < size; ++i)
+		image.data[i] = (image.data[i] > boundary) * UINT8_MAX;
 
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
 
 	return static_cast<int>(1 / std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(end - start).count());
 }
 
+// Convert the image to a binary image using the specified boundary with scalar operations
 int thresholdScalar(cv::Mat& image, uint8_t boundary)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
 
-	int64_t size = static_cast<uint64_t>(image.rows) * image.cols * image.channels();
+	uint64_t size = static_cast<uint64_t>(image.rows) * image.cols * image.channels();
 
-	for (int64_t i = 0; i < size; ++i)
-		image.data[i] = image.data[i] > boundary ? UINT8_MAX : 0;
+	for (uint64_t i = 0; i < size; ++i)
+		image.data[i] = (image.data[i] > boundary) * UINT8_MAX;
 
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
 
@@ -94,7 +95,7 @@ void thresholdDemo(const std::string& videoPath)
 
 			++frameCount;
 
-			if (cv::sum(frameScalar != frameAVX256) != cv::Scalar(0) || cv::sum(frameScalar != frameOpenCVSIMD) != cv::Scalar(0)) break;
+			if (cv::sum(frameScalar != frameAVX256) != cv::Scalar(0) || cv::sum(frameScalar != frameOpenCVSIMD) != cv::Scalar(0)) return;
 			cv::cvtColor(frameScalar, frameScalar, cv::COLOR_GRAY2BGR);
 			plotFPS(plot, std::pair<int, int>{xmax, ymax}, frameCount, avgRange, fpss);
 			writeFPS(frameScalar, frameCount, fpss);

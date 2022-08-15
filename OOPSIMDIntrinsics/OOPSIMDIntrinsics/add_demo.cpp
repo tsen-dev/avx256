@@ -5,7 +5,6 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "test.h"
 #include "avx256.h"
 #include "demo.h"
 
@@ -14,9 +13,9 @@ int addScalar(cv::Mat& image1, cv::Mat& image2)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();	
 
-	int64_t size = static_cast<uint64_t>(image1.rows) * image1.cols * image1.channels();
+	uint64_t size = static_cast<uint64_t>(image1.rows) * image1.cols * image1.channels();
 
-	for (int64_t i = 0; i < size; ++i)
+	for (uint64_t i = 0; i < size; ++i)
 		image1.data[i] = static_cast<uint8_t>(image1.data[i] + image2.data[i]) >= image1.data[i] ? image1.data[i] + image2.data[i] : UINT8_MAX;
 
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
@@ -31,14 +30,14 @@ int addAVX256(cv::Mat& image1, cv::Mat& image2)
 
 	AVX256<uint8_t> avxImage1{ image1.data }, avxImage2{ image2.data };
 
-	int64_t size = static_cast<uint64_t>(image1.rows) * image1.cols * image1.channels();
-	int64_t count = size / 32;
+	uint64_t size = static_cast<uint64_t>(image1.rows) * image1.cols * image1.channels();
+	uint64_t count = size / 32;
 	int residualCount = size % 32;
 
 	for (int i = 0; i < count; ++i, avxImage1.Next(), avxImage2.Next())
 		avxImage1 += avxImage2;
 
-	for (int64_t i = size - residualCount; i < size; ++i)
+	for (uint64_t i = size - residualCount; i < size; ++i)
 		image1.data[i] = static_cast<uint8_t>(image1.data[i] + image2.data[i]) >= image1.data[i] ? image1.data[i] + image2.data[i] : UINT8_MAX;
 
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
@@ -86,7 +85,7 @@ void addDemo(const std::string& video1Path, const std::string& video2Path)
 
 			++frameCount;
 
-			if (cv::sum(frame1Scalar != frame1AVX256) != cv::Scalar(0, 0, 0) || cv::sum(frame1Scalar != frame1OpenCVSIMD) != cv::Scalar(0, 0, 0)) break;
+			if (cv::sum(frame1Scalar != frame1AVX256) != cv::Scalar(0, 0, 0) || cv::sum(frame1Scalar != frame1OpenCVSIMD) != cv::Scalar(0, 0, 0)) return;
 			plotFPS(plot, std::pair<int, int>{xmax, ymax}, frameCount, avgRange, fpss);
 			writeFPS(frame1Scalar, frameCount, fpss);
 
@@ -99,6 +98,4 @@ void addDemo(const std::string& video1Path, const std::string& video2Path)
 		frameCount = 0, video1.set(cv::CAP_PROP_POS_FRAMES, 0), video2.set(cv::CAP_PROP_POS_FRAMES, 0);
 		plot = createFPSPlot(cv::Size(video1.get(cv::CAP_PROP_FRAME_WIDTH), video1.get(cv::CAP_PROP_FRAME_HEIGHT) / 2.5), std::pair<int, int>{xmax, ymax}, avgRange);
 	}
-
-	
 }
