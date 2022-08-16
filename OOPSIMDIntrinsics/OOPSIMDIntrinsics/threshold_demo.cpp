@@ -6,7 +6,6 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
-#include "test.h"
 #include "avx256.h"
 #include "demo.h"
 
@@ -27,7 +26,7 @@ int thresholdAVX256(cv::Mat& image, uint8_t boundary)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
 
-	AVX256<uint8_t> avxImage1{ image.data };
+	AVX256<uint8_t> avxImage{ image.data };
 	AVX256<uint8_t> avxBoundary{}; 
 	avxBoundary = boundary;
 
@@ -35,8 +34,8 @@ int thresholdAVX256(cv::Mat& image, uint8_t boundary)
 	uint64_t count = size / 32;
 	int residualCount = size % 32;
 
-	for (int i = 0; i < count; ++i, avxImage1.Next())
-		avxImage1 = avxImage1 > avxBoundary;
+	for (int i = 0; i < count; ++i, avxImage.Next())
+		avxImage = avxImage > avxBoundary;
 
 	for (uint64_t i = size - residualCount; i < size; ++i)
 		image.data[i] = (image.data[i] > boundary) * UINT8_MAX;
@@ -61,7 +60,7 @@ int thresholdScalar(cv::Mat& image, uint8_t boundary)
 	return static_cast<int>(1 / std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(end - start).count());
 }
 
-// Convert the frames of the video into a binary image using scalar, simd, and cv::threshold() (with SIMD acceleration). The threshold boundary is configurable by a trackbar element
+// Convert the frames of the video into a binary image using scalar, AVX256, and cv::threshold() (with SIMD acceleration). The threshold boundary is configurable by a trackbar element
 void thresholdDemo(const std::string& videoPath)
 {
 	cv::Mat frame, result;

@@ -1162,7 +1162,7 @@ public:
 		else if constexpr (true) return Permute32(order.Data);
 	}
 
-	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, to corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
+	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, the corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
 	template <typename U>
 	AVX256& Permute8(const U* order)
 	{
@@ -1177,7 +1177,7 @@ public:
 		return *this;
 	}
 
-	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, to corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
+	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, the corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
 	template <typename U>
 	AVX256& Permute8(const std::array<U, 32 / sizeof(U)>& order)
 	{
@@ -1185,7 +1185,7 @@ public:
 		else if constexpr (true) return Permute8(order.data());
 	}
 
-	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, to corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
+	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, the corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
 	template <typename U>
 	AVX256& Permute8(const AVX256<U>& order)
 	{

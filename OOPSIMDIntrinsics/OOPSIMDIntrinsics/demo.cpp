@@ -10,6 +10,7 @@
 #include "add_demo.h"
 #include "threshold_demo.h"
 #include "abs_diff_demo.h"
+#include "bgr_to_rgb_demo.h"
 
 #ifndef TEST
 
@@ -70,6 +71,7 @@ int main(void)
 		addDemo("C:/Users/Toprak/Desktop/1.mp4", "C:/Users/Toprak/Desktop/2.mp4");
 		thresholdDemo("C:/Users/Toprak/Desktop/1.mp4");
 		absDiffDemo("C:/Users/Toprak/Desktop/3.mp4");
+		bgrToRGBDemo("C:/Users/Toprak/Desktop/1.mp4");
 	}
 
 	else std::cerr << "Error: Your CPU does not support the AVX2 instruction set!";

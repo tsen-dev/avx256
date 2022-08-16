@@ -30,7 +30,7 @@ int absDiffAVX256(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
 
-	AVX256<uint8_t> avxPreviousFrame{ previousFrame.data }, avxCurrentFrame{ currentFrame.data }, avxMask{ mask.data }, min{};
+	AVX256<uint8_t> avxPreviousFrame{ previousFrame.data }, avxCurrentFrame{ currentFrame.data }, avxMask{ mask.data };
 
 	uint64_t size = static_cast<uint64_t>(currentFrame.rows) * currentFrame.cols * currentFrame.channels();
 	uint64_t count = size / 32;
@@ -72,7 +72,7 @@ void absDiffDemo(const std::string& videoPath)
 	int width = video.get(cv::CAP_PROP_FRAME_WIDTH), height = video.get(cv::CAP_PROP_FRAME_HEIGHT);
 	cv::Mat maskScalar(height, width, CV_8UC1), maskAVX256(height, width, CV_8UC1), maskOpenCVSIMD(height, width, CV_8UC1), maskBGR(height, width, CV_8UC3);
 
-	int xmax = video.get(cv::CAP_PROP_FRAME_COUNT) - 1, ymax = 20000, avgRange = 15;
+	int xmax = video.get(cv::CAP_PROP_FRAME_COUNT) - 1, ymax = 10000, avgRange = 15;
 	cv::Mat plot = createFPSPlot(cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT) / 2.5), std::pair<int, int>{xmax, ymax}, avgRange);
 
 	std::vector<std::vector<int>> fpss(3, std::vector<int>(xmax));	
