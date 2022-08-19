@@ -6,8 +6,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "test.h"
 #include "avx256.h"
 #include "demo.h"
+
+#ifndef TEST
 
 int absDiffScalar(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 {
@@ -113,3 +116,5 @@ void absDiffDemo(const std::string& videoPath)
 		video.read(previousFrameGray), cv::cvtColor(previousFrameGray, previousFrameGray, cv::COLOR_BGR2GRAY);
 	}
 }
+
+#endif

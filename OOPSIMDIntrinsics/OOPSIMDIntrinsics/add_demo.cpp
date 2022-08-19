@@ -5,8 +5,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "test.h"
 #include "avx256.h"
 #include "demo.h"
+
+#ifndef TEST
 
 // Add image2 to image1 using scalar addition, return fps performance metric
 int addScalar(cv::Mat& image1, cv::Mat& image2)
@@ -99,3 +102,5 @@ void addDemo(const std::string& video1Path, const std::string& video2Path)
 		plot = createFPSPlot(cv::Size(video1.get(cv::CAP_PROP_FRAME_WIDTH), video1.get(cv::CAP_PROP_FRAME_HEIGHT) / 2.5), std::pair<int, int>{xmax, ymax}, avgRange);
 	}
 }
+
+#endif

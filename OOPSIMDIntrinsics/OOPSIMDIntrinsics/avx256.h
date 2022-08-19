@@ -34,7 +34,7 @@ public:
 	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Next() { Data += (256 / 8) / sizeof(T); } 
 	
-	// Increments 'Data' to point to the previous 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
+	// Decrements 'Data' to point to the previous 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
 	~AVX256() { if (OwnsData) delete[] Data; }

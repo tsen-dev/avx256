@@ -5,8 +5,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "test.h"
 #include "avx256.h"
 #include "demo.h"
+
+#ifndef TEST
 
 // Convert a BGR video to RGB using scalar operations, return fps performance metric
 int bgrToRGBScalar(cv::Mat& image)
@@ -128,3 +131,5 @@ void bgrToRGBDemo(const std::string& videoPath)
 		plot = createFPSPlot(cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT) / 2.5), std::pair<int, int>{xmax, ymax}, avgRange);
 	}
 }
+
+#endif

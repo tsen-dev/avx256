@@ -6,8 +6,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "test.h"
 #include "avx256.h"
 #include "demo.h"
+
+#ifndef TEST
 
 // Convert the image to a binary image using the specified boundary with cv::threshold() (simd)
 int thresholdOpenCVSIMD(cv::Mat& image, uint8_t boundary)
@@ -109,3 +112,5 @@ void thresholdDemo(const std::string& videoPath)
 		plot = createFPSPlot(cv::Size(video.get(cv::CAP_PROP_FRAME_WIDTH), video.get(cv::CAP_PROP_FRAME_HEIGHT) / 3), std::pair<int, int>{xmax, ymax}, avgRange);
 	}
 }
+
+#endif

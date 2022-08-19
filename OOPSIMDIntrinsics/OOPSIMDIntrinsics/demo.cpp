@@ -6,6 +6,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "test.h"
 #include "avx256.h"
 #include "add_demo.h"
 #include "threshold_demo.h"
