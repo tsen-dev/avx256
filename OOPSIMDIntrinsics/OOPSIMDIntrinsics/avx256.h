@@ -31,10 +31,10 @@ public:
 
 	T& operator[] (int index) const { return Data[index]; }	
 
-	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
+	// Increments 'Data' to point to the next 32 bytes (or 256 bits). Should only be used if adjacent memory is safe to access.
 	void Next() { Data += (256 / 8) / sizeof(T); } 
 	
-	// Decrements 'Data' to point to the previous 32 bytes (or 256 bits). Should not be used if adjacent memory isn't safe to access.
+	// Decrements 'Data' to point to the previous 32 bytes (or 256 bits). Should only be used if adjacent memory is safe to access.
 	void Previous() { Data -= (256 / 8) / sizeof(T); } 
 
 	~AVX256() { if (OwnsData) delete[] Data; }
@@ -175,6 +175,7 @@ public:
 	// Multiplication //////////////////
 
 	/*
+	* 64-bit (floating-point): Full-width multiplication
 	* 64-bit (integer): The low 32-bits of each element are multiplied, the 64-bit result is saved
 	* 32-bit (integer): 32-bits are multiplied, the low 32-bits of the result is saved
 	* 16-bit: 16-bits are multiplied, the low 16-bits of the result is saved
@@ -706,12 +707,12 @@ public:
 	// Returns true if all elements are 0, false otherwise
 	bool IsZero() 
 	{ 
-		if constexpr (std::is_same_v<T, double>) switch (_mm256_testz_pd(_mm256_loadu_pd(Data), _mm256_loadu_pd(Data))) { case 0: return false; case 1: return true; }
-		else if constexpr (std::is_same_v<T, float>) switch (_mm256_testz_ps(_mm256_loadu_ps(Data), _mm256_loadu_ps(Data))) { case 0: return false; case 1: return true; }
-		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) switch (_mm256_testz_si256(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(Data))) { case 0: return false; case 1: return true; }
-		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) switch (_mm256_testz_si256(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(Data))) { case 0: return false; case 1: return true; }
-		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) switch (_mm256_testz_si256(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(Data))) { case 0: return false; case 1: return true; }
-		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) switch (_mm256_testz_si256(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(Data))) { case 0: return false; case 1: return true; }
+		if constexpr (std::is_same_v<T, double>) return static_cast<bool>(_mm256_testz_si256(_mm256_castpd_si256(_mm256_loadu_pd(Data)), _mm256_castpd_si256(_mm256_loadu_pd(Data))));
+		else if constexpr (std::is_same_v<T, float>) return static_cast<bool>(_mm256_testz_si256(_mm256_castps_si256(_mm256_loadu_ps(Data)), _mm256_castps_si256(_mm256_loadu_ps(Data))));
+		else if constexpr (std::is_same_v<T, int64_t> || std::is_same_v<T, uint64_t>) return static_cast<bool>(_mm256_testz_si256(_mm256_loadu_epi64(Data), _mm256_loadu_epi64(Data)));
+		else if constexpr (std::is_same_v<T, int32_t> || std::is_same_v<T, uint32_t>) return static_cast<bool>(_mm256_testz_si256(_mm256_loadu_epi32(Data), _mm256_loadu_epi32(Data)));
+		else if constexpr (std::is_same_v<T, int16_t> || std::is_same_v<T, uint16_t>) return static_cast<bool>(_mm256_testz_si256(_mm256_loadu_epi16(Data), _mm256_loadu_epi16(Data)));
+		else if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, uint8_t>) return static_cast<bool>(_mm256_testz_si256(_mm256_loadu_epi8(Data), _mm256_loadu_epi8(Data)));
 		return false;
 	}	
 
@@ -1075,18 +1076,10 @@ public:
 	}
 
 	// Computes the mean of corresponding elements, fractional results are rounded up to the nearest integer. This function is only available for 16 and 8-bit integers
+	AVX256& Average(const std::array<T, 32 / sizeof(T)>& operand) { return Average(operand.data()); }
+
+	// Computes the mean of corresponding elements, fractional results are rounded up to the nearest integer. This function is only available for 16 and 8-bit integers
 	AVX256& Average(const AVX256& operand) { return Average(operand.Data); }
-
-
-	// Inverse ///////////
-
-	// Computes an approximation of the inverse (i.e. reciprocal) of each element (max relative error < 1.5*2^-12). This function is only available for 32-bit floating point types
-	AVX256& Inverse()
-	{
-		if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_rcp_ps(_mm256_loadu_ps(Data)));
-		else if constexpr (true) static_assert(false, "AVX256: Inverse() is only available for 32-bit floating point types");
-		return *this;
-	}
 
 
 	// Sqrt ///////////
@@ -1097,6 +1090,17 @@ public:
 		if constexpr (std::is_same_v<T, double>) _mm256_storeu_pd(Data, _mm256_sqrt_pd(_mm256_loadu_pd(Data)));
 		else if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_sqrt_ps(_mm256_loadu_ps(Data)));
 		else if constexpr (true) static_assert(false, "AVX256: Sqrt() is only available for floating point types");
+		return *this;
+	}
+
+
+	// Inverse ///////////
+
+	// Computes an approximation of the inverse (i.e. reciprocal) of each element (max relative error < 1.5*2^-12). This function is only available for 32-bit floating point types
+	AVX256& Inverse()
+	{
+		if constexpr (std::is_same_v<T, float>) _mm256_storeu_ps(Data, _mm256_rcp_ps(_mm256_loadu_ps(Data)));
+		else if constexpr (true) static_assert(false, "AVX256: Inverse() is only available for 32-bit floating point types");
 		return *this;
 	}
 
@@ -1114,7 +1118,7 @@ public:
 
 	// Permute ///////////
 
-	// Re-orders 64-bit elements using the specified order. Each argument specifies the index of the element that will be copied to that element, one element can be copied to many elements
+	// Re-orders 64-bit elements using the specified order. Each template argument specifies the index of the element that will be copied to that element (one element can be copied to many elements)
 	template<int dst0, int dst1, int dst2, int dst3>
 	AVX256& Permute64()
 	{
@@ -1131,7 +1135,7 @@ public:
 		return *this;
 	}
 
-	// Re-orders 32-bit the elements using the specified order. Each element in order specifies the index of the element that will be copied to that element, one element can be copied to many elements. Order indices should be between 0 and 7 inclusive
+	// Re-orders 32-bit elements using the specified order. Each element in order specifies the index of the element that will be copied to that element (one element can be copied to many elements). Order indices should be between 0 and 7 inclusive
 	template <typename U>
 	AVX256& Permute32(const U* order)
 	{
@@ -1146,7 +1150,7 @@ public:
 		return *this;
 	}
 
-	// Re-orders 32-bit the elements using the specified order. Each element in order specifies the index of the element that will be copied to that element, one element can be copied to many elements. Order indices should be between 0 and 7 inclusive. 
+	// Re-orders 32-bit elements using the specified order. Each element in order specifies the index of the element that will be copied to that element (one element can be copied to many elements). Order indices should be between 0 and 7 inclusive. 
 	template <typename U>
 	AVX256& Permute32(const std::array<U, 32 / sizeof(U)>& order)
 	{
@@ -1154,7 +1158,7 @@ public:
 		else if constexpr (true) return Permute32(order.data());
 	}
 
-	// Re-orders 32-bit the elements using the specified order. Each element in order specifies the index of the element that will be copied to that element, one element can be copied to many elements. Order indices should be between 0 and 7 inclusive
+	// Re-orders 32-bit elements using the specified order. Each element in order specifies the index of the element that will be copied to that element (one element can be copied to many elements). Order indices should be between 0 and 7 inclusive
 	template <typename U>
 	AVX256& Permute32(const AVX256<U>& order)
 	{
@@ -1162,7 +1166,7 @@ public:
 		else if constexpr (true) return Permute32(order.Data);
 	}
 
-	// Re-orders 8-bit the elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, the corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
+	// Re-orders 8-bit elements within 128-bit lanes using the specified order. order[0] to order[15] permute elements dst[0] to dst[15], while order[16] to order[31] permute elements dst[16] to dst[31]. If the MSB of an order element is set, the corresponding byte in dst is cleared. One element can be copied to many elements. Order indices should be between 0 and 15 inclusive. 
 	template <typename U>
 	AVX256& Permute8(const U* order)
 	{

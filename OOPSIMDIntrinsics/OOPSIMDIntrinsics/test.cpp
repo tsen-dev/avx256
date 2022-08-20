@@ -585,6 +585,18 @@ void testAVX256IsZero()
 	assert(avxULongs2.IsZero() == false);
 	assert(avxULongs3.IsZero() == false);
 	assert(avxULongs4.IsZero() == true);
+
+	AVX256<double> avxDoubles0{ {0.0, 0.0, 0.0, 1.0} };
+	AVX256<double> avxDoubles1{ {0.0, 0.0, 1.0, 0.0} };
+	AVX256<double> avxDoubles2{ {0.0, 1.0, 0.0, 0.0} };
+	AVX256<double> avxDoubles3{ {1.0, 0.0, 0.0, 0.0} };
+	AVX256<double> avxDoubles4{ {0.0, 0.0, 0.0, 0.0} };
+
+	assert(avxDoubles0.IsZero() == false);
+	assert(avxDoubles1.IsZero() == false);
+	assert(avxDoubles2.IsZero() == false);
+	assert(avxDoubles3.IsZero() == false);
+	assert(avxDoubles4.IsZero() == true);
 }
 
 void testAVX256IsEqualTo()
@@ -760,9 +772,9 @@ void testAVX256Average()
 	uint16_t myUShorts1[16] = { 0, 4, 10, UINT16_MAX, 0, 4, 10, UINT16_MAX, 0, 4, 10, UINT16_MAX, 0, 4, 10, UINT16_MAX };
 	uint16_t myUShortsResults[16] = { 0, 2, 11, UINT16_MAX, 0, 2, 11, UINT16_MAX, 0, 2, 11, UINT16_MAX, 0, 2, 11, UINT16_MAX };
 
-	int16_t myShorts0[16] = { 0, 0, 11, INT16_MAX, 0, 0, 11, -INT16_MAX, 0, 0, 11, INT16_MAX, 0, 0, 11, INT16_MAX };
-	int16_t myShorts1[16] = { 0, 4, 10, -INT16_MAX, 0, 4, 10, -INT16_MAX, 0, 4, 10, INT16_MAX, 0, 4, 10, INT16_MAX };
-	int16_t myShortsResults[16] = { 0, 2, 11, 0, 0, 2, 11, -INT16_MAX, 0, 2, 11, INT16_MAX, 0, 2, 11, INT16_MAX };
+	int16_t myShorts0[16] = { 0, 0, 11, INT16_MAX, -3, -10, INT16_MAX, -INT16_MAX, 0, 0, 11, INT16_MAX, -3, -10, INT16_MAX, -INT16_MAX };
+	int16_t myShorts1[16] = { 0, 4, 10, -INT16_MAX, -3, 3, INT16_MIN, -INT16_MAX, 0, 4, 10, -INT16_MAX, -3, 3, INT16_MIN, -INT16_MAX };
+	int16_t myShortsResults[16] = { 0, 2, 11, 0, -3, -3, 0, -INT16_MAX, 0, 2, 11, 0, -3, -3, 0, -INT16_MAX };
 
 	uint8_t myUChars0[32] = { 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX,
 							  0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX, 0, 0, 11, UINT8_MAX };
@@ -771,18 +783,18 @@ void testAVX256Average()
 	uint8_t myUCharsResults[32] = { 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX,
 									0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX, 0, 2, 11, UINT8_MAX };
 
-	int8_t myChars0[32] = { 0, 0, 11, INT8_MAX, 0, 0, 11, -INT8_MAX, 0, 0, 11, INT8_MAX, 0, 0, 11, INT8_MAX,
-						    0, 0, 11, -INT8_MAX, 0, 0, 11, -INT8_MAX, 0, 0, 11, INT8_MAX, 0, 0, 11, INT8_MAX };
-	int8_t myChars1[32] = { 0, 4, 10, -INT8_MAX, 0, 4, 10, -INT8_MAX, 0, 4, 10, INT8_MAX, 0, 4, 10, INT8_MAX,
-							0, 4, 10, -INT8_MAX, 0, 4, 10, -INT8_MAX, 0, 4, 10, INT8_MAX, 0, 4, 10, INT8_MAX };
-	int8_t myCharsResults[32] = { 0, 2, 11, 0, 0, 2, 11, -INT8_MAX, 0, 2, 11, INT8_MAX, 0, 2, 11, INT8_MAX,
-								  0, 2, 11, -INT8_MAX, 0, 2, 11, -INT8_MAX, 0, 2, 11, INT8_MAX, 0, 2, 11, INT8_MAX };
+	int8_t myChars0[32] = { 0, 0, 11, INT8_MAX, -3, -10, INT8_MAX, -INT8_MAX, 0, 0, 11, INT8_MAX, -3, -10, INT8_MAX, -INT8_MAX,
+							0, 0, 11, INT8_MAX, -3, -10, INT8_MAX, -INT8_MAX, 0, 0, 11, INT8_MAX, -3, -10, INT8_MAX, -INT8_MAX };
+	int8_t myChars1[32] = { 0, 4, 10, -INT8_MAX, -3, 3, INT8_MIN, -INT8_MAX, 0, 4, 10, -INT8_MAX, -3, 3, INT8_MIN, -INT8_MAX,
+							0, 4, 10, -INT8_MAX, -3, 3, INT8_MIN, -INT8_MAX, 0, 4, 10, -INT8_MAX, -3, 3, INT8_MIN, -INT8_MAX };
+	int8_t myCharsResults[32] = { 0, 2, 11, 0, -3, -3, 0, -INT8_MAX, 0, 2, 11, 0, -3, -3, 0, -INT8_MAX,
+								  0, 2, 11, 0, -3, -3, 0, -INT8_MAX, 0, 2, 11, 0, -3, -3, 0, -INT8_MAX };
 
 	AVX256<uint16_t> avxUShorts{ myUShorts0 };
 	AVX256<int16_t> avxShorts{ myShorts0 };
 	AVX256<uint8_t> avxUChars{ myUChars0 };
 	AVX256<int8_t> avxChars{ myChars0 };
-	
+
 	avxUShorts.Average(myUShorts1);
 	avxShorts.Average(myShorts1);
 	avxUChars.Average(myUChars1);

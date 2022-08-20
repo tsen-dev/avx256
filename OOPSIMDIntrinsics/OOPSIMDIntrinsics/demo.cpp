@@ -64,7 +64,7 @@ void writeFPS(cv::Mat& image, int frameCount, const std::vector<std::vector<int>
 }
 
 int main(void)
-{
+{	
 	cv::setNumThreads(0);
 
 	if (AVX256Utils::HasAVX2Support())
