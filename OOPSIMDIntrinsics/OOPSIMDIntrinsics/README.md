@@ -4,6 +4,7 @@
 - [Demos](https://github.com/tsen-dev/avx256#demos)
 - [Documentation](https://github.com/tsen-dev/avx256#documentation)
 
+<br>
 
 # Overview
 
@@ -15,6 +16,7 @@ It is built on [compiler intrinsics](https://docs.microsoft.com/en-us/cpp/intrin
 
 This library requires C++17 or above due to its use of  `if constexpr (...)` for conditional compilation
 
+<br>
 
 # Quickstart Guide
 1. Identify whether your CPU supports AVX2 instructions. This can be done in one of two ways:
@@ -23,6 +25,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
         - As this is a [MASM](https://en.wikipedia.org/wiki/Microsoft_Macro_Assembler) function, it is defined separately in the `avx256utils_asm.asm` file
         - In Visual Studio, this file can be included in your build process by `right clicking your project > Build Dependencies > Build Customisations... > masm` (must be done before any MASM files are imported into the project)
     
+<br>
 
 2. Create an AVX256 object:
     - An `AVX256<T>` object points to a contiguous 256-bit (32 bytes) of `T` data, the starting address of which is stored in its `T* Data` attribute
@@ -33,20 +36,40 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
             - This constructor can also be used with initialiser lists, e.g. `AVX256<double>{{1.0, 2.0, 3.0, 4.0}};`
         4. `AVX256<T>{avx}`: Allocates 32-bytes of memory for the specified type `T` (e.g. 32 chars or, 8 floats, etc) and sets its `Data` to point to it. The data pointed to by `AVX256<T> avx` is then copied into AVX256's own memory via 256-bit AVX move instructions. The allocated memory is de-allocated during destruction
     
+<br>
 
 3. Call the AVX256 object's methods:
     - An AVX256 object exposes SIMD operations via its methods. There are four types of operations:
         1. Destructive operations (i.e. ones that overwrite the AVX256 object's `Data`) return a reference to the AVX256 object, allowing chained method calls. E.g. `avx1.Clear().Negate().Sub(avx2);`
            - These operations can also be called via assignment operators, e.g. `avx1 += avx2` (addition assignment) is equivalent to `avx1.Add(avx2)` 
         2. Non-destructive operations return their result in an `std::array`. E.g. `avx1.LessThan(avx2)` returns a mask array
-           - These operations can also be called via their operators, e.g. `avx1 < avx2` is equivalent to `avx1.LessThan(avx2)` 
+           - These operations can also be called via their operators, e.g. `avx1 < avx2` is equivalent to `avx1.IsLessThan(avx2)` 
         3. Methods that return a single value. E.g. `avx1.IsZero()` or `avx1.Sum()`
         4. Methods that return no values. E.g. `avx1.Next()` or `avx1.Previous()`
     - See the [documentation](https://github.com/tsen-dev/avx256#documentation) below for all available operations
     
+<br>
 
 4. The items of an AVX256 object can be accessed via the subscript operator (e.g. `avx[15]`), and can be written to an `std::ostream` via the `<<` operator (e.g. `std::cout << AVX256<uint64_t>{{1, 2, 3, 4}}` prints `|1|2|3|4|`)
     
+<br>
+
+5. The AVX256 library also features custom compilation errors, which provide more insight than standard template errors. E.g:
+    - <code>AVX256<uint64_t> avx{ {10, 20, 30, 40} };<br>
+      avx.Permute64<4, 2, 1, 0>(); // Attempt to reverse order of elements, but the first order index is mistakenly set to 4 (out-of-bounds) instead of 3<br>
+      </code>
+        - Compilation output: `avx256.h(1125,105): error C2338: AVX256: Indices must be between 0 and 3 inclusive`<br>![error_1](readme_animations/error_1.PNG)
+    - <code>class X { public: uint8_t x[32]; };<br>
+	AVX256<X> avx{}; // Attempt to create an AVX256 with an unsupported type<br>
+      </code>
+        - Compilation output: `avx256.h(21,41): error C2338: AVX256: AVX256 is only available for non-void primitive types!`<br>![error_2](readme_animations/error_2.PNG)
+    - <code>AVX256<uint64_t> avx{ {10, 20, 30, 40} };<br>
+	avx.Ceil(); // Attempt to use a function that isn't available for that type<br>
+      </code>
+        - Compilation output: `avx256.h(895,42): error C2338: AVX256: Ceil() is only available for floating point types`<br>![error_3](readme_animations/error_3.PNG)
+
+<br>
+
 
 # Demos
 
@@ -62,6 +85,8 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 
 [comment]: <> (![Demo_4]&#40;readme_animations/bgr_to_rgb_demo.gif&#41;)
 
+<br>
+
 # Documentation
 
 - [Construction](https://github.com/tsen-dev/avx256#construction)
@@ -75,31 +100,45 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 - [Permute](https://github.com/tsen-dev/avx256#permute)
 - [Utility](https://github.com/tsen-dev/avx256#utility)
 
+<br>
+
 ### Construction
 - `AVX256()`: Create an AVX256 that points to a newly allocated 32-bytes
 - `AVX256(T* const data)`: Create an AVX256 that points to the specified data
 - `AVX256(const std::array<T, 32 / sizeof(T)>& data)`: Create an AVX256 that points to a newly allocated 32-bytes which has the specified array copied into it.
 - `AVX256(const AVX256& avx)`: Create an AVX256 that points to a newly allocated 32-bytes which has the specified AVX256's data copied into it.
 
+<br>
 
 ### Destruction
 - `~AVX256()`: De-allocate the pointed memory if it was newly allocated during construction 
 
+<br>
 
 ### Assignment
 
-- #### Set
+- #### Set (broadcast)
+  <ul>Broadcast the specified value into all elements of the AVX256</ul><br>
+  
     - `AVX256& Set(const T value)`: Broadcasts the specified value into all elements of the AVX256
+    
+    #### = operator
+    - `AVX256& operator=(const T value)`
+    
+
+- #### Set (variable)
+    <ul>Copy the specified data into AVX256's data</ul><br>  
+
     - `AVX256& Set(const T* values)`: Copy the specified data into AVX256's data
     - `AVX256& Set(const std::array<T, 32 / sizeof(T)>& values)`: Copy the specified data into AVX256's data 
     - `AVX256& Set(const AVX256& values)`: Copy the specified data into AVX256's data
     
     #### = operator
-    - `AVX256& operator=(const T value)`
     - `AVX256& operator=(const T* values)`
     - `AVX256& operator=(const std::array<T, 32 / sizeof(T)>& values)` 
     - `AVX256& operator=(const AVX256& values)`
 
+<br>
     
 ### Arithmetic
 
@@ -165,7 +204,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
     - `std::array<T, 32 / sizeof(T)> operator-(const AVX256& operand)`
 
 
-- ####Multiplication
+- #### Multiplication
   <ul>
   Multiply the elements of the operand by the corresponding elements of the AVX256 object.
   <br>Write the result in the AVX256 object's data<br>
@@ -216,6 +255,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
     - `std::array<T, 32 / sizeof(T)> operator/(const std::array<T, 32 / sizeof(T)>& operand)`
     - `std::array<T, 32 / sizeof(T)> operator/(const AVX256& operand)`
     
+<br>
 
 ### Math
 
@@ -304,9 +344,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 
     - `AVX256& InverseSqrt()`
     
-
-
-
+<br>
 
 ### Bitwise
 
@@ -381,6 +419,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
     - `std::array<T, 32 / sizeof(T)> operator^(const std::array<T, 32 / sizeof(T)>& operand)`
     - `std::array<T, 32 / sizeof(T)> operator^(const AVX256& operand)`
 
+<br>
 
 ### Comparison
 
@@ -429,15 +468,14 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
     - `std::array<T, 32 / sizeof(T)> operator<(const std::array<T, 32 / sizeof(T)>& values)`
     - `std::array<T, 32 / sizeof(T)> operator<(const AVX256& values)`
     
-
-    
+<br>
 
 ### Shift
 
 - #### ShiftLeft (constant shift)
     <ul>Perform a logical left shift on each element of the AVX256 by the amount specified by the operand.<br>
     Write the result in the AVX256's data<br><br>
-    Available on 16, 32, and 64-bit integers only</ul><br>
+    Available for 16, 32, and 64-bit integers only</ul><br>
   
     - `AVX256& ShiftLeft(const int shift)`
     
@@ -453,7 +491,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 - #### ShiftLeft (variable shift)
     <ul>Perform a logical left shift on each element of the AVX256 by the amount specified by the corresponding element of the operand (i.e. <code>avx[i] = avx[i] << operand[i]</code>).<br>
     Write the result in the AVX256's data<br><br>
-    Available on 32 and 64-bit integers only
+    Available for 32 and 64-bit integers only
     </ul><br>
   
     - `AVX256& ShiftLeft(const T* shifts)`
@@ -515,6 +553,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
     - `std::array<T, 32 / sizeof(T)> operator>>(const std::array<T, 32 / sizeof(T)>& shifts)`
     - `std::array<T, 32 / sizeof(T)> operator>>(const AVX256& shifts)`
     
+<br>
 
 ### Permute
 
@@ -541,6 +580,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
     - `AVX256& Permute8(const std::array<U, 32 / sizeof(U)>& order)`
     - `AVX256& Permute8(const AVX256<U>& order)`
 
+<br>
 
 ### Utility
 - `AVX256& Clear()`: Set all elements of the AVX256 to zero

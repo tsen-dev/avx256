@@ -1071,7 +1071,7 @@ public:
 				)
 			);
 		}
-		else if constexpr (true) { static_assert(false, "AVX256: Average() only available for 16 and 8-bit integers"); }
+		else if constexpr (true) { static_assert(false, "AVX256: Average() is only available for 16 and 8-bit integers"); }
 		return *this;
 	}
 
