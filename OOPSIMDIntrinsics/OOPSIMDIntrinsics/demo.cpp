@@ -8,7 +8,7 @@
 
 #include "test.h"
 #include "avx256.h"
-#include "add_demo.h"
+#include "blend_demo.h"
 #include "threshold_demo.h"
 #include "abs_diff_demo.h"
 #include "bgr_to_rgb_demo.h"
@@ -69,7 +69,7 @@ int main(void)
 
 	if (AVX256Utils::HasAVX2Support())
 	{
-		addDemo("videos/1.mp4", "videos/2.mp4");
+		blendDemo("videos/1.mp4", "videos/2.mp4");
 		thresholdDemo("videos/1.mp4");
 		absDiffDemo("videos/3.mp4");
 		bgrToRGBDemo("videos/1.mp4");

@@ -207,7 +207,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 - #### Multiplication
   <ul>
   Multiply the elements of the operand by the corresponding elements of the AVX256 object.
-  <br>Write the result in the AVX256 object's data<br>
+  <br>Write the result in the AVX256 object's data<br><br>
   
   64-bit (floating-point): Full-width multiplication 
   <br>64-bit (integer): The low 32-bits of each element are multiplied, the 64-bit result is saved
