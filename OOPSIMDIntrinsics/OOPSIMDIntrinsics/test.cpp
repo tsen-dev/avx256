@@ -668,6 +668,27 @@ void testAVX256Absolute()
 	assert(AVX256<int8_t>{avxChars.IsEqualTo({ 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3, 4, 3, 2, 1, 0, 1, 2, 3 })}.Negate().IsZero());
 }
 
+void testAVX256AbsoluteDifference()
+{
+	assert((AVX256<double>{AVX256<double>{ {-4, -2, 0, 2} }.AbsoluteDifference({ -2, 2, 4, -1 }).IsEqualTo({ 2, 4, 4, 3 })}.Negate().IsZero()));
+	assert((AVX256<float>{AVX256<float>{ {-4, -2, 0, 2, -4, -2, 0, 2 } }.AbsoluteDifference({ -2, 2, 4, -1, -2, 2, 4, -1 }).IsEqualTo({ 2, 4, 4, 3, 2, 4, 4, 3 })}.Negate().IsZero()));
+	assert((AVX256<uint32_t>{AVX256<uint32_t>{ { UINT32_MAX, 0, 50, 100, UINT32_MAX, 0, 50, 100 } }
+		.AbsoluteDifference({ 0, UINT32_MAX, 100, 50, 0, UINT32_MAX, 100, 50 })
+			.IsEqualTo({ UINT32_MAX, UINT32_MAX, 50, 50, UINT32_MAX, UINT32_MAX, 50, 50 })}.Negate().IsZero()));
+	assert((AVX256<uint16_t>{AVX256<uint16_t>{ { UINT16_MAX, 0, 50, 100, UINT16_MAX, 0, 50, 100, UINT16_MAX, 0, 50, 100, UINT16_MAX, 0, 50, 100 } }
+		.AbsoluteDifference({ 0, UINT16_MAX, 100, 50, 0, UINT16_MAX, 100, 50, 0, UINT16_MAX, 100, 50, 0, UINT16_MAX, 100, 50 })
+		.IsEqualTo({ UINT16_MAX, UINT16_MAX, 50, 50, UINT16_MAX, UINT16_MAX, 50, 50, UINT16_MAX, UINT16_MAX, 50, 50, UINT16_MAX, UINT16_MAX, 50, 50 })}.Negate().IsZero()));
+	assert((AVX256<uint8_t>{AVX256<uint8_t>{ { 
+			UINT8_MAX, 0, 50, 100, UINT8_MAX, 0, 50, 100, UINT8_MAX, 0, 50, 100, UINT8_MAX, 0, 50, 100, 
+			UINT8_MAX, 0, 50, 100, UINT8_MAX, 0, 50, 100, UINT8_MAX, 0, 50, 100, UINT8_MAX, 0, 50, 100 } }
+		.AbsoluteDifference({ 
+		0, UINT8_MAX, 100, 50, 0, UINT8_MAX, 100, 50, 0, UINT8_MAX, 100, 50, 0, UINT8_MAX, 100, 50,
+		0, UINT8_MAX, 100, 50, 0, UINT8_MAX, 100, 50, 0, UINT8_MAX, 100, 50, 0, UINT8_MAX, 100, 50 })
+		.IsEqualTo({ 
+		UINT8_MAX, UINT8_MAX, 50, 50, UINT8_MAX, UINT8_MAX, 50, 50, UINT8_MAX, UINT8_MAX, 50, 50, UINT8_MAX, UINT8_MAX, 50, 50,
+		UINT8_MAX, UINT8_MAX, 50, 50, UINT8_MAX, UINT8_MAX, 50, 50, UINT8_MAX, UINT8_MAX, 50, 50, UINT8_MAX, UINT8_MAX, 50, 50 })}.Negate().IsZero()));
+}
+
 void testAVX256Min()
 {
 	AVX256<double> avxDoubles1{ {0, 1, 2, 3} }, avxDoubles2{ {-1, 0, 3, 4} };
@@ -912,6 +933,7 @@ void runTests()
 	testAVX256IsGreaterThan();
 	testAVX256IsLessThan();
 	testAVX256Absolute();
+	testAVX256AbsoluteDifference();
 	testAVX256Min();
 	testAVX256Max();
 	testAVX256Floor();

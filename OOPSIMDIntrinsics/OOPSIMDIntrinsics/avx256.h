@@ -831,6 +831,89 @@ public:
 	}
 
 
+	// AbsoluteDifference ///////////
+
+	AVX256& AbsoluteDifference(const T* operand)
+	{
+		if constexpr (std::is_same_v<T, double>)
+			_mm256_storeu_pd(
+				Data,
+				_mm256_sub_pd(
+					_mm256_max_pd(
+						_mm256_loadu_pd(Data),
+						_mm256_loadu_pd(operand)
+					),
+					_mm256_min_pd(
+						_mm256_loadu_pd(Data),
+						_mm256_loadu_pd(operand)
+					)
+				)
+			);
+		else if constexpr (std::is_same_v<T, float>)
+			_mm256_storeu_ps(
+				Data,
+				_mm256_sub_ps(
+					_mm256_max_ps(
+						_mm256_loadu_ps(Data),
+						_mm256_loadu_ps(operand)
+					),
+					_mm256_min_ps(
+						_mm256_loadu_ps(Data),
+						_mm256_loadu_ps(operand)
+					)
+				)
+			);		
+		else if constexpr (std::is_same_v<T, uint32_t>) 
+			_mm256_storeu_epi32(
+				Data,
+				_mm256_sub_epi32(
+					_mm256_max_epu32(
+						_mm256_loadu_epi32(Data),
+						_mm256_loadu_epi32(operand)
+					),
+					_mm256_min_epu32(
+						_mm256_loadu_epi32(Data),
+						_mm256_loadu_epi32(operand)
+					)
+				)
+			);
+		else if constexpr (std::is_same_v<T, uint16_t>) 
+			_mm256_storeu_epi16(
+				Data,
+				_mm256_or_si256(
+					_mm256_subs_epu16(
+						_mm256_loadu_epi16(Data),
+						_mm256_loadu_epi16(operand)
+					),
+					_mm256_subs_epu16(
+						_mm256_loadu_epi16(operand),
+						_mm256_loadu_epi16(Data)
+					)
+				)
+			);
+		else if constexpr (std::is_same_v<T, uint8_t>) 
+			_mm256_storeu_epi8(
+				Data,
+				_mm256_or_si256(
+					_mm256_subs_epu8(
+						_mm256_loadu_epi8(Data),
+						_mm256_loadu_epi8(operand)
+					),
+					_mm256_subs_epu8(
+						_mm256_loadu_epi8(operand),
+						_mm256_loadu_epi8(Data)
+					)
+				)
+			);		
+		else if constexpr (true) static_assert(false, "AVX256: AbsoluteDifference() is not available for signed (and unsigned 64-bit) integers");
+		return *this;
+	}
+
+	AVX256& AbsoluteDifference(const std::array<T, 32 / sizeof(T)>& operand) { return AbsoluteDifference(operand.data()); }
+
+	AVX256& AbsoluteDifference(const AVX256& operand) { return AbsoluteDifference(operand.Data); }
+
+
 	// Min ///////////
 
 	// This function is not available for 64-bit integers

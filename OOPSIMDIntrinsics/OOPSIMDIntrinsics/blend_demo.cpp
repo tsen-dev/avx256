@@ -91,9 +91,9 @@ void blendDemo(const std::string& video1Path, const std::string& video2Path)
 
 			if (cv::sum(frame1Scalar != frame1AVX256) != cv::Scalar(0, 0, 0) || !std::equal(frame1Scalar.data, frame1Scalar.data + size, frame1OpenCVSIMD.data, [](const int& a, const int& b) {return std::abs(a - b) <= 1; })) return;
 			plotFPS(plot, std::pair<int, int>{xmax, ymax}, frameCount, avgRange, fpss);
-			writeFPS(frame1OpenCVSIMD, frameCount, fpss);
+			writeFPS(frame1Scalar, frameCount, fpss);
 
-			cv::vconcat(std::array<cv::Mat, 2>{frame1OpenCVSIMD, plot}, result);
+			cv::vconcat(std::array<cv::Mat, 2>{frame1Scalar, plot}, result);
 			cv::imshow("Output", result);
 
 			if (cv::pollKey() != -1) { cv::destroyAllWindows(); return; }
@@ -105,3 +105,39 @@ void blendDemo(const std::string& video1Path, const std::string& video2Path)
 }
 
 #endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

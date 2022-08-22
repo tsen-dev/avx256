@@ -1,6 +1,7 @@
 #include <string>
 #include <chrono>
 #include <array>
+#include <cmath>
 
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
@@ -12,6 +13,7 @@
 
 #ifndef TEST
 
+// Create a mask over the pixels that show a difference from the previous frame using scalar operations, return fps performance metric
 int absDiffScalar(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
@@ -19,16 +21,14 @@ int absDiffScalar(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 	uint64_t size = static_cast<uint64_t>(currentFrame.rows) * currentFrame.cols * currentFrame.channels();
 
 	for (uint64_t i = 0; i < size; ++i)
-		mask.data[i] = (
-			(static_cast<uint8_t>(currentFrame.data[i] - previousFrame.data[i]) <= currentFrame.data[i] ? currentFrame.data[i] - previousFrame.data[i] : 0) |
-			(static_cast<uint8_t>(previousFrame.data[i] - currentFrame.data[i]) <= previousFrame.data[i] ? previousFrame.data[i] - currentFrame.data[i] : 0)
-			);
+		mask.data[i] = abs(currentFrame.data[i] - previousFrame.data[i]);
 
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
 
 	return static_cast<int>(1 / std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(end - start).count());
 }
 
+// Create a mask over the pixels that show a difference from the previous frame using AVX256, return fps performance metric
 int absDiffAVX256(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
@@ -40,22 +40,17 @@ int absDiffAVX256(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 	int residualCount = size % 32;
 
 	for (int i = 0; i < count; ++i, avxCurrentFrame.Next(), avxPreviousFrame.Next(), avxMask.Next())
-	{
-		avxMask = avxCurrentFrame - avxPreviousFrame;
-		avxMask |= avxPreviousFrame - avxCurrentFrame;
-	}
+		avxMask.Set(avxCurrentFrame).AbsoluteDifference(avxPreviousFrame);
 
 	for (uint64_t i = size - residualCount; i < size; ++i)
-		mask.data[i] = (
-			(static_cast<uint8_t>(currentFrame.data[i] - previousFrame.data[i]) <= currentFrame.data[i] ? currentFrame.data[i] - previousFrame.data[i] : 0) |
-			(static_cast<uint8_t>(previousFrame.data[i] - currentFrame.data[i]) <= previousFrame.data[i] ? previousFrame.data[i] - currentFrame.data[i] : 0)
-			);
+		mask.data[i] = abs(currentFrame.data[i] - previousFrame.data[i]);
 		
 	std::chrono::steady_clock::time_point end = std::chrono::high_resolution_clock::now();
 
 	return static_cast<int>(1 / std::chrono::duration_cast<std::chrono::duration<double, std::ratio<1, 1>>>(end - start).count());
 }
 
+// Create a mask over the pixels that show a difference from the previous frame using cv::absdiff(), return fps performance metric
 int absDiffOpenCVSIMD(cv::Mat& previousFrame, cv::Mat& currentFrame, cv::Mat& mask)
 {
 	std::chrono::steady_clock::time_point start = std::chrono::high_resolution_clock::now();
