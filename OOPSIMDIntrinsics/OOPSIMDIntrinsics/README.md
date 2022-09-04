@@ -73,173 +73,17 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 
 # Demos
 
+####Blending
+![Demo_1](readme_animations/blending_demo.gif)
 
-![Demo_1](readme_animations/add_demo.gif)
-
-Scalar: 
-
-<pre><code>for (uint64_t i = 0; i < size; ++i)
-  image1.data[i] = (image1.data[i] + image2.data[i] + 1) >> 1;
-
-movd        xmm2,dword ptr [rcx+r9]  
-xorps       xmm0,xmm0  
-punpcklbw   xmm2,xmm0  
-punpcklwd   xmm2,xmm0  
-movd        xmm1,dword ptr [rbx+r9]  
-punpcklbw   xmm1,xmm0  
-punpcklwd   xmm1,xmm0  
-paddd       xmm2,xmm1  
-paddd       xmm2,xmm3  
-psrad       xmm2,xmm4  
-pshuflw     xmm0,xmm2,0D8h  
-pshufhw     xmm1,xmm0,0D8h  
-xorps       xmm0,xmm0  
-pshufd      xmm2,xmm1,0D8h  
-pand        xmm2,xmmword ptr [__xmm@00ff00ff00ff00ff00ff00ff00ff00ff]  
-packuswb    xmm2,xmm2  
-movd        dword ptr [rcx+r9],xmm2 ; Save result  
-; The loop body ends here, but is unrolled to include three more iterations
-
-; Iteration 2 start
-movd        xmm1,dword ptr [rcx+r9+4]  
-movd        xmm2,dword ptr [rbx+r9+4]
-; Only 4 bytes (32-bits) are processed per iteration
-
-;... 3 more iterations ... 
-
-add         r9,10h  
-cmp         r9,rax  
-jb          blendScalar+0E0h
-</code></pre>
-  1. Used 128-bit SSE instructions instead of 256-bit AVX
-  2. Failed to use the dedicated averaging instruction (PAVGB), creating more verbose code:
-      - Each byte had to be extended into a dword (32-bits) to ensure the intermediate addition doesn't overflow (even though bytes only really need to be extended into words (16-bits))
-      - This is why only 4 bytes can be processed per iteration (32 * 4 = 128) instead of 8 (16 * 8 = 128) 
-  
-<pre><code>for (int i = 0; i < count; ++i, avxImage1.Next(), avxImage2.Next())
-  avxImage1.Average(avxImage2);
-
-test        r9,r9  
-je          blendDemo+5C2h 
-nop  
-vmovdqu     ymm1,ymmword ptr [rdx]  
-vpavgb      ymm1,ymm1,ymmword ptr [rcx]  
-vmovdqu     ymmword ptr [rcx],ymm1  
-inc         r8d  
-lea         rcx,[rcx+20h]  
-lea         rdx,[rdx+20h]  
-movsxd      rax,r8d  
-cmp         rax,r9  
-jb          blendDemo+5A0h
-</code></pre>
-  
-  - 32 bytes (256-bits) are processed per iteration
-
+####Thresholding  
 ![Demo_2](readme_animations/threshold_demo.gif)
 
-Scalar:
-
-<pre><code>for (uint64_t i = 0; i < size; ++i)
-  image.data[i] = (image.data[i] > boundary) * UINT8_MAX;
-
-test        r8,r8  
-je          thresholdDemo+5C8h  
-nop         dword ptr [rax]  
-nop         word ptr [rax+rax]  
-mov         rcx,qword ptr [rbp+310h]  
-cmp         dil,byte ptr [rcx+rdx]  
-sbb         al,al  
-mov         byte ptr [rcx+rdx],al  
-inc         rdx  
-cmp         rdx,r8  
-jb          thresholdDemo+5B0h
-</code></pre>
-
-  - Failed to vectorise
-
-AVX256:
-
-<pre><code>for (int i = 0; i < count; ++i, avxImage.Next())
-  avxImage = avxImage > avxBoundary;
-
-test        rdx,rdx  
-je          thresholdAVX256+0EFh  
-vmovdqu     ymm3,ymmword ptr [__ymm@8080808080808080808080808080808080808080808080808080808080808080]  
-nop         word ptr [rax+rax]
-
-; Convert unsigned numbers to signed since the AVX comparison instruction is signed 
-vpxor       ymm2,ymm3,ymmword ptr [r15]  
-vpxor       ymm1,ymm3,ymmword ptr [rdi]
-
-vpcmpgtb    ymm2,ymm1,ymm2  
-vmovdqu     ymmword ptr [rdi],ymm2
-inc         ecx  
-lea         rdi,[rdi+20h]  
-movsxd      rax,ecx  
-cmp         rax,rdx  
-jb          thresholdAVX256+0D0h
-</code></pre>
-
+####Absolute Difference
 ![Demo_3](readme_animations/abs_diff_demo.gif)
 
-<pre><code>for (uint64_t i = 0; i < size; ++i)
-  mask.data[i] = abs(currentFrame.data[i] - previousFrame.data[i]);
-
-00007FF6A8E651D0 66 43 0F 6E 04 06    movd        xmm0,dword ptr [r14+r8]  
-00007FF6A8E651D6 66 43 0F 6E 0C 07    movd        xmm1,dword ptr [r15+r8]  
-00007FF6A8E651DC 66 0F 38 31 D0       pmovzxbd    xmm2,xmm0  
-00007FF6A8E651E1 66 0F 38 31 C1       pmovzxbd    xmm0,xmm1  
-00007FF6A8E651E6 66 0F FA D0          psubd       xmm2,xmm0  
-00007FF6A8E651EA 66 0F 38 1E C2       pabsd       xmm0,xmm2  
-00007FF6A8E651EF F2 0F 70 C8 D8       pshuflw     xmm1,xmm0,0D8h  
-00007FF6A8E651F4 66 43 0F 6E 44 06 04 movd        xmm0,dword ptr [r14+r8+4]  
-00007FF6A8E651FB F3 0F 70 D1 D8       pshufhw     xmm2,xmm1,0D8h  
-00007FF6A8E65200 66 43 0F 6E 4C 07 04 movd        xmm1,dword ptr [r15+r8+4]  
-00007FF6A8E65207 66 0F 70 DA D8       pshufd      xmm3,xmm2,0D8h  
-00007FF6A8E6520C 66 0F DB 1D 0C 44 00 00 pand        xmm3,xmmword ptr [__xmm@00ff00ff00ff00ff00ff00ff00ff00ff (07FF6A8E69620h)]  
-00007FF6A8E65214 66 0F 67 DB          packuswb    xmm3,xmm3  
-00007FF6A8E65218 66 42 0F 7E 1C 01    movd        dword ptr [rcx+r8],xmm3  
-00007FF6A8E6521E 66 0F 38 31 D0       pmovzxbd    xmm2,xmm0  
-00007FF6A8E65223 66 0F 38 31 C1       pmovzxbd    xmm0,xmm1  
-00007FF6A8E65228 66 0F FA D0          psubd       xmm2,xmm0  
-00007FF6A8E6522C 66 0F 38 1E C2       pabsd       xmm0,xmm2  
-00007FF6A8E65231 F2 0F 70 C8 D8       pshuflw     xmm1,xmm0,0D8h  
-00007FF6A8E65236 66 43 0F 6E 44 06 08 movd        xmm0,dword ptr [r14+r8+8]  
-00007FF6A8E6523D F3 0F 70 D1 D8       pshufhw     xmm2,xmm1,0D8h  
-00007FF6A8E65242 66 43 0F 6E 4C 07 08 movd        xmm1,dword ptr [r15+r8+8]  
-00007FF6A8E65249 66 0F 70 DA D8       pshufd      xmm3,xmm2,0D8h  
-00007FF6A8E6524E 66 0F DB 1D CA 43 00 00 pand        xmm3,xmmword ptr [__xmm@00ff00ff00ff00ff00ff00ff00ff00ff (07FF6A8E69620h)]  
-00007FF6A8E65256 66 0F 67 DB          packuswb    xmm3,xmm3  
-00007FF6A8E6525A 66 42 0F 7E 5C 01 04 movd        dword ptr [rcx+r8+4],xmm3  
-00007FF6A8E65261 66 0F 38 31 D0       pmovzxbd    xmm2,xmm0  
-00007FF6A8E65266 66 0F 38 31 C1       pmovzxbd    xmm0,xmm1  
-00007FF6A8E6526B 66 0F FA D0          psubd       xmm2,xmm0  
-00007FF6A8E6526F 66 0F 38 1E C2       pabsd       xmm0,xmm2  
-00007FF6A8E65274 F2 0F 70 C8 D8       pshuflw     xmm1,xmm0,0D8h  
-00007FF6A8E65279 66 43 0F 6E 44 06 0C movd        xmm0,dword ptr [r14+r8+0Ch]  
-00007FF6A8E65280 F3 0F 70 D1 D8       pshufhw     xmm2,xmm1,0D8h  
-00007FF6A8E65285 66 43 0F 6E 4C 07 0C movd        xmm1,dword ptr [r15+r8+0Ch]  
-00007FF6A8E6528C 66 0F 70 DA D8       pshufd      xmm3,xmm2,0D8h  
-00007FF6A8E65291 66 0F DB 1D 87 43 00 00 pand        xmm3,xmmword ptr [__xmm@00ff00ff00ff00ff00ff00ff00ff00ff (07FF6A8E69620h)]  
-00007FF6A8E65299 66 0F 67 DB          packuswb    xmm3,xmm3  
-00007FF6A8E6529D 66 42 0F 7E 5C 01 08 movd        dword ptr [rcx+r8+8],xmm3  
-00007FF6A8E652A4 66 0F 38 31 D0       pmovzxbd    xmm2,xmm0  
-00007FF6A8E652A9 66 0F 38 31 C1       pmovzxbd    xmm0,xmm1  
-00007FF6A8E652AE 66 0F FA D0          psubd       xmm2,xmm0  
-00007FF6A8E652B2 66 0F 38 1E C2       pabsd       xmm0,xmm2  
-00007FF6A8E652B7 F2 0F 70 C8 D8       pshuflw     xmm1,xmm0,0D8h  
-00007FF6A8E652BC F3 0F 70 D1 D8       pshufhw     xmm2,xmm1,0D8h  
-00007FF6A8E652C1 66 0F 70 DA D8       pshufd      xmm3,xmm2,0D8h  
-00007FF6A8E652C6 66 0F DB 1D 52 43 00 00 pand        xmm3,xmmword ptr [__xmm@00ff00ff00ff00ff00ff00ff00ff00ff (07FF6A8E69620h)]  
-00007FF6A8E652CE 66 0F 67 DB          packuswb    xmm3,xmm3  
-00007FF6A8E652D2 66 42 0F 7E 5C 01 0C movd        dword ptr [rcx+r8+0Ch],xmm3  
-00007FF6A8E652D9 49 83 C0 10          add         r8,10h  
-00007FF6A8E652DD 4C 3B C0             cmp         r8,rax  
-00007FF6A8E652E0 0F 82 EA FE FF FF    jb          absDiffScalar+110h (07FF6A8E651D0h)  
-</code></pre>
-
-
-[comment]: <> (![Demo_4]&#40;readme_animations/bgr_to_rgb_demo.gif&#41;)
+####BGR to RGB
+![Demo_4](readme_animations/bgr_to_rgb_demo.gif)
 
 <br>
 
