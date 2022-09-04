@@ -77,7 +77,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 ![Demo_1](readme_animations/blending_demo.gif)
 
 #### Thresholding  
-![Demo_2](readme_animations/threshold_demo.gif)
+![Demo_2](readme_animations/thresholding_demo.gif)
 
 #### Absolute Difference
 ![Demo_3](readme_animations/abs_diff_demo.gif)
