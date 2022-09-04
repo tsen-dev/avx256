@@ -73,16 +73,16 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 
 # Demos
 
-####Blending
+#### Blending
 ![Demo_1](readme_animations/blending_demo.gif)
 
-####Thresholding  
+#### Thresholding  
 ![Demo_2](readme_animations/threshold_demo.gif)
 
-####Absolute Difference
+#### Absolute Difference
 ![Demo_3](readme_animations/abs_diff_demo.gif)
 
-####BGR to RGB
+#### BGR to RGB
 ![Demo_4](readme_animations/bgr_to_rgb_demo.gif)
 
 <br>
