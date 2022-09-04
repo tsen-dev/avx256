@@ -1,8 +1,8 @@
 # Contents
-- [Overview](https://github.com/tsen-dev/avx256#overview)
-- [Quickstart Guide](https://github.com/tsen-dev/avx256#quickstart-guide)
-- [Demos](https://github.com/tsen-dev/avx256#demos)
-- [Documentation](https://github.com/tsen-dev/avx256#documentation)
+- [Overview](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#overview)
+- [Quickstart Guide](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#quickstart-guide)
+- [Demos](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#demos)
+- [Documentation](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#documentation)
 
 <br>
 
@@ -46,7 +46,7 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
            - These operations can also be called via their operators, e.g. `avx1 < avx2` is equivalent to `avx1.IsLessThan(avx2)` 
         3. Methods that return a single value. E.g. `avx1.IsZero()` or `avx1.Sum()`
         4. Methods that return no values. E.g. `avx1.Next()` or `avx1.Previous()`
-    - See the [documentation](https://github.com/tsen-dev/avx256#documentation) below for all available operations
+    - See the [documentation](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#documentation) below for all available operations
     
 <br>
 
@@ -89,16 +89,16 @@ This library requires C++17 or above due to its use of  `if constexpr (...)` for
 
 # Documentation
 
-- [Construction](https://github.com/tsen-dev/avx256#construction)
-- [Destruction](https://github.com/tsen-dev/avx256#destruction)
-- [Assignment](https://github.com/tsen-dev/avx256#assignment)
-- [Arithmetic](https://github.com/tsen-dev/avx256#arithmetic)
-- [Math](https://github.com/tsen-dev/avx256#math)
-- [Bitwise](https://github.com/tsen-dev/avx256#bitwise)
-- [Comparison](https://github.com/tsen-dev/avx256#comparison)
-- [Shift](https://github.com/tsen-dev/avx256#shift)
-- [Permute](https://github.com/tsen-dev/avx256#permute)
-- [Utility](https://github.com/tsen-dev/avx256#utility)
+- [Construction](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#construction)
+- [Destruction](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#destruction)
+- [Assignment](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#assignment)
+- [Arithmetic](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#arithmetic)
+- [Math](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#math)
+- [Bitwise](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#bitwise)
+- [Comparison](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#comparison)
+- [Shift](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#shift)
+- [Permute](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#permute)
+- [Utility](https://github.com/tsen-dev/avx256/tree/master/OOPSIMDIntrinsics/OOPSIMDIntrinsics#utility)
 
 <br>
 
